@@ -5,96 +5,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>HealthSys - @yield('title', 'Gestion Cabinet Médical')</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    @stack('styles')
+    <style>
+        .sidebar-item {
+            @apply flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-200;
+        }
+        .sidebar-item:hover {
+            @apply bg-primary-50 text-primary-600;
+        }
+        .sidebar-item.active {
+            @apply bg-primary-600 text-white;
+        }
+    </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url('/') }}">
-                <i class="fas fa-hospital-user"></i> HealthSys
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    @auth
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('dashboard') }}">
-                                <i class="fas fa-tachometer-alt"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('patients.index') }}">
-                                <i class="fas fa-users"></i> Patients
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('doctors.index') }}">
-                                <i class="fas fa-user-md"></i> Médecins
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('appointments.index') }}">
-                                <i class="fas fa-calendar-alt"></i> Rendez-vous
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('prescriptions.index') }}">
-                                <i class="fas fa-prescription"></i> Ordonnances
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user"></i> {{ auth()->user()->name }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-sign-out-alt"></i> Déconnexion
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    @else
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Connexion</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">Inscription</a>
-                        </li>
-                    @endauth
-                </ul>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white shadow-lg">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-hospital-user text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">HealthSys</h1>
+                        <p class="text-xs text-gray-500">Cabinet médical</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
-
-    <main class="py-4">
-        <div class="container">
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            
+            <nav class="p-4 space-y-1">
+                <a href="{{ route('dashboard') }}" class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span>Tableau de bord</span>
+                </a>
+                
+                <a href="{{ route('patients.index') }}" class="sidebar-item {{ request()->routeIs('patients.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Patients</span>
+                </a>
+                
+                <a href="{{ route('doctors.index') }}" class="sidebar-item {{ request()->routeIs('doctors.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-user-md w-5"></i>
+                    <span>Médecins</span>
+                </a>
+                
+                <a href="{{ route('appointments.index') }}" class="sidebar-item {{ request()->routeIs('appointments.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Rendez-vous</span>
+                </a>
+                
+                <a href="{{ route('calendar') }}" class="sidebar-item {{ request()->routeIs('calendar') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-calendar-week w-5"></i>
+                    <span>Calendrier</span>
+                </a>
+                
+                <a href="{{ route('waiting-room') }}" class="sidebar-item {{ request()->routeIs('waiting-room') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-clock w-5"></i>
+                    <span>Salle d'attente</span>
+                </a>
+                
+                <a href="{{ route('prescriptions.index') }}" class="sidebar-item {{ request()->routeIs('prescriptions.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-prescription w-5"></i>
+                    <span>Ordonnances</span>
+                </a>
+                
+                <a href="{{ route('invoices.index') }}" class="sidebar-item {{ request()->routeIs('invoices.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-file-invoice-dollar w-5"></i>
+                    <span>Factures</span>
+                </a>
+                
+                <a href="{{ route('reports.index') }}" class="sidebar-item {{ request()->routeIs('reports.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-chart-bar w-5"></i>
+                    <span>Rapports</span>
+                </a>
+                
+                @if(auth()->user()->role == 'admin')
+                <a href="{{ route('users.index') }}" class="sidebar-item {{ request()->routeIs('users.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>Utilisateurs</span>
+                </a>
+                @endif
+            </nav>
+            
+            <div class="absolute bottom-0 w-72 p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-gray-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-gray-500">{{ ucfirst(auth()->user()->role) }}</p>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-gray-400 hover:text-red-500">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
                 </div>
-            @endif
+            </div>
+        </aside>
 
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-8">
+                @if(session('success'))
+                    <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <p class="text-green-700">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                @endif
 
-            @yield('content')
-        </div>
-    </main>
+                @if(session('error'))
+                    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                            <p class="text-red-700">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                @endif
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+                @yield('content')
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @stack('scripts')
 </body>
 </html>

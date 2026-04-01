@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('invoice_number')->unique();
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
-            $table->foreignId('consultation_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('consultation_id')->nullable()->constrained()->onDelete('set null');
             $table->decimal('amount', 10, 2);
             $table->decimal('paid_amount', 10, 2)->default(0);
             $table->string('status')->default('pending');

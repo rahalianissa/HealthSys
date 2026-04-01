@@ -13,11 +13,11 @@ return new class extends Migration
             $table->foreignId('consultation_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->foreignId('doctor_id')->constrained()->onDelete('cascade');
-            $table->text('medications'); // Stocké en JSON
+            $table->text('medications');
             $table->text('instructions')->nullable();
             $table->date('prescription_date');
             $table->date('valid_until')->nullable();
-            $table->string('status')->default('active'); // active, expired, cancelled
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }
