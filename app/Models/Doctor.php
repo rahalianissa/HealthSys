@@ -4,19 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Patient extends Model
+class Doctor extends Model
 {
     protected $fillable = [
         'user_id',
-        'insurance_number',
-        'insurance_company',
-        'emergency_contact',
-        'emergency_phone',
-        'allergies',
-        'medical_history',
-        'blood_type',
-        'weight',
-        'height'
+        'specialty',
+        'registration_number',
+        'consultation_fee',
+        'diploma',
+        'cabinet_phone',
+        'schedule'
+    ];
+
+    protected $casts = [
+        'schedule' => 'array',
     ];
 
     public function user()
@@ -34,11 +35,6 @@ class Patient extends Model
         return $this->hasMany(Consultation::class);
     }
 
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
     public function waitingRooms()
     {
         return $this->hasMany(WaitingRoom::class);
@@ -52,10 +48,5 @@ class Patient extends Model
     public function getFullNameAttribute()
     {
         return $this->user->name;
-    }
-
-    public function getAgeAttribute()
-    {
-        return $this->user->birth_date ? \Carbon\Carbon::parse($this->user->birth_date)->age : null;
     }
 }
