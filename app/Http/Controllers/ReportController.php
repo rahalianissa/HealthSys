@@ -11,30 +11,23 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         return view('reports.index');
     }
 
     public function monthly(Request $request)
-    {
+{
         $month = $request->month ? Carbon::parse($request->month) : Carbon::now();
         
         $appointments = Appointment::whereYear('date_time', $month->year)
             ->whereMonth('date_time', $month->month)
             ->get();
-            
-        $invoices = Invoice::whereYear('issue_date', $month->year)
-            ->whereMonth('issue_date', $month->month)
-            ->get();
-            
-        $newPatients = Patient::whereYear('created_at', $month->year)
-            ->whereMonth('created_at', $month->month)
-            ->count();
-            
-        $totalRevenue = $invoices->sum('amount');
-        $totalPaid = $invoices->sum('paid_amount');
         
         $stats = [
             'month' => $month->format('F Y'),
@@ -42,10 +35,10 @@ class ReportController extends Controller
             'confirmed_appointments' => $appointments->where('status', 'confirmed')->count(),
             'cancelled_appointments' => $appointments->where('status', 'cancelled')->count(),
             'completed_appointments' => $appointments->where('status', 'completed')->count(),
-            'new_patients' => $newPatients,
-            'total_revenue' => $totalRevenue,
-            'total_paid' => $totalPaid,
-            'pending_payment' => $totalRevenue - $totalPaid,
+            'new_patients' => Patient::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->count(),
+            'total_revenue' => Invoice::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->sum('amount'),
+            'total_paid' => Invoice::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->sum('paid_amount'),
+            'pending_payment' => Invoice::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->sum('amount') - Invoice::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->sum('paid_amount'),
             'appointments_by_type' => [
                 'general' => $appointments->where('type', 'general')->count(),
                 'emergency' => $appointments->where('type', 'emergency')->count(),
@@ -63,63 +56,22 @@ class ReportController extends Controller
         
         $monthlyData = [];
         for ($i = 1; $i <= 12; $i++) {
-            $appointments = Appointment::whereYear('date_time', $year)
-                ->whereMonth('date_time', $i)
-                ->count();
-                
-            $revenue = Invoice::whereYear('issue_date', $year)
-                ->whereMonth('issue_date', $i)
-                ->sum('amount');
-                
             $monthlyData[] = [
                 'month' => Carbon::create($year, $i, 1)->format('F'),
-                'appointments' => $appointments,
-                'revenue' => $revenue
+                'appointments' => Appointment::whereYear('date_time', $year)->whereMonth('date_time', $i)->count(),
+                'revenue' => Invoice::whereYear('created_at', $year)->whereMonth('created_at', $i)->sum('amount'),
             ];
         }
-        
-        $totalAppointments = Appointment::whereYear('date_time', $year)->count();
-        $totalPatients = Patient::whereYear('created_at', $year)->count();
-        $totalRevenue = Invoice::whereYear('issue_date', $year)->sum('amount');
-        $totalPaid = Invoice::whereYear('issue_date', $year)->sum('paid_amount');
         
         $stats = [
             'year' => $year,
-            'total_appointments' => $totalAppointments,
-            'total_patients' => $totalPatients,
-            'total_revenue' => $totalRevenue,
-            'total_paid' => $totalPaid,
-            'pending_payment' => $totalRevenue - $totalPaid,
-            'monthly_data' => $monthlyData
+            'total_appointments' => Appointment::whereYear('date_time', $year)->count(),
+            'total_patients' => Patient::whereYear('created_at', $year)->count(),
+            'total_revenue' => Invoice::whereYear('created_at', $year)->sum('amount'),
+            'total_paid' => Invoice::whereYear('created_at', $year)->sum('paid_amount'),
+            'monthly_data' => $monthlyData,
         ];
         
         return view('reports.yearly', compact('stats', 'year'));
-    }
-    
-    public function export(Request $request)
-    {
-        $type = $request->type;
-        $format = $request->format ?? 'pdf';
-        
-        if ($type == 'monthly') {
-            $month = $request->month ? Carbon::parse($request->month) : Carbon::now();
-            $appointments = Appointment::with(['patient.user', 'doctor.user'])
-                ->whereYear('date_time', $month->year)
-                ->whereMonth('date_time', $month->month)
-                ->get();
-                
-            $data = [
-                'title' => 'Rapport mensuel - ' . $month->format('F Y'),
-                'appointments' => $appointments,
-                'month' => $month
-            ];
-            
-            if ($format == 'pdf') {
-                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.export-pdf', $data);
-                return $pdf->download('rapport_' . $month->format('Y-m') . '.pdf');
-            }
-        }
-        
-        return back()->with('success', 'Export généré avec succès');
     }
 }

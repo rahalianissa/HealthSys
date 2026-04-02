@@ -8,7 +8,7 @@
     <div class="col-md-12 mb-4">
         <div class="welcome-card text-center">
             <h2 class="mb-0">Prendre un rendez-vous</h2>
-            <p>dans un des meilleurs cabinet médical au Maroc, nous avons les meilleurs médecins au Maroc, avec les derniers types de technologie</p>
+            <p>dans un des meilleurs cabinet médical , nous avons les meilleurs médecins , avec les derniers types de technologie</p>
             <div class="mt-3">
                 <a href="#prendre" class="btn btn-custom-primary me-2">Prendre rendez-vous</a>
                 <a href="#annuler" class="btn btn-custom-outline">Annuler rendez-vous</a>

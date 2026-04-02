@@ -131,4 +131,22 @@ class InvoiceController extends Controller
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Paiement enregistré avec succès');
     }
-}
+    public function patientInvoices()
+    {
+        $user = auth()->user();
+        $patient = $user->patient;
+        
+        if (!$patient) {
+            $patient = Patient::create([
+                'user_id' => $user->id,
+            ]);
+        }
+        
+        $invoices = Invoice::with(['patient.user'])
+            ->where('patient_id', $patient->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('patient.invoices', compact('invoices'));
+    }
+    }

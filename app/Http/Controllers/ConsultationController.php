@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Consultation;
 use App\Models\Patient;
 use App\Models\Doctor;
@@ -9,7 +10,11 @@ use Illuminate\Http\Request;
 
 class ConsultationController extends Controller
 {
-    
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         $consultations = Consultation::with(['patient.user', 'doctor.user'])
@@ -35,9 +40,6 @@ class ConsultationController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'doctor_id' => 'required|exists:doctors,id',
             'consultation_date' => 'required|date',
-            'symptoms' => 'nullable',
-            'diagnosis' => 'nullable',
-            'treatment' => 'nullable',
         ]);
 
         $consultation = Consultation::create([
@@ -56,7 +58,6 @@ class ConsultationController extends Controller
             'notes' => $request->notes,
         ]);
 
-        // Mettre à jour le statut du rendez-vous
         if ($request->appointment_id) {
             Appointment::where('id', $request->appointment_id)->update(['status' => 'completed']);
         }
@@ -67,7 +68,7 @@ class ConsultationController extends Controller
 
     public function show(Consultation $consultation)
     {
-        $consultation->load(['patient.user', 'doctor.user', 'appointment', 'prescriptions']);
+        $consultation->load(['patient.user', 'doctor.user', 'appointment']);
         return view('consultations.show', compact('consultation'));
     }
 
@@ -99,15 +100,42 @@ class ConsultationController extends Controller
             ->with('success', 'Consultation supprimée avec succès');
     }
 
-    public function forPatient(Patient $patient)
+    // Méthodes pour le médecin
+    public function doctorConsultations()
     {
-        $consultations = $patient->consultations()->with('doctor.user')->orderBy('consultation_date', 'desc')->get();
-        return view('consultations.patient', compact('patient', 'consultations'));
+        $consultations = Consultation::with(['patient.user'])
+            ->where('doctor_id', auth()->user()->doctor->id)
+            ->orderBy('consultation_date', 'desc')
+            ->get();
+        
+        return view('doctor.consultations', compact('consultations'));
     }
 
-    public function forDoctor(Doctor $doctor)
+    public function visitHistory()
     {
-        $consultations = $doctor->consultations()->with('patient.user')->orderBy('consultation_date', 'desc')->get();
-        return view('consultations.doctor', compact('doctor', 'consultations'));
+        $consultations = Consultation::with(['patient.user'])
+            ->where('doctor_id', auth()->user()->doctor->id)
+            ->orderBy('consultation_date', 'desc')
+            ->get();
+        
+        return view('doctor.history', compact('consultations'));
     }
+
+    // Méthodes pour le patient
+    public function patientMedicalRecord()
+    {
+        $consultations = Consultation::with(['doctor.user'])
+            ->where('patient_id', auth()->user()->patient->id)
+            ->orderBy('consultation_date', 'desc')
+            ->get();
+        
+        return view('patient.medical-record', compact('consultations'));
+    }
+
+    public function details(Consultation $consultation)
+    {
+        $consultation->load(['patient.user', 'doctor.user']);
+        return response()->json($consultation);
+    }
+    
 }

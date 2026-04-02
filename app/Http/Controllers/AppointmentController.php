@@ -88,10 +88,24 @@ class AppointmentController extends Controller
     }
 
     // Patient methods
+    // Patient methods
     public function patientIndex()
     {
+        $user = auth()->user();
+        $patient = $user->patient;
+        
+        // Vérifier et créer le patient si nécessaire
+        if (!$patient) {
+            $patient = Patient::create([
+                'user_id' => $user->id,
+            ]);
+            // Recharger la relation
+            $user->refresh();
+            $patient = $user->patient;
+        }
+        
         $appointments = Appointment::with(['doctor.user'])
-            ->where('patient_id', auth()->user()->patient->id)
+            ->where('patient_id', $patient->id)
             ->orderBy('date_time', 'desc')
             ->get();
 
@@ -105,6 +119,17 @@ class AppointmentController extends Controller
 
     public function bookOnline(Request $request)
     {
+        $user = auth()->user();
+        $patient = $user->patient;
+        
+        if (!$patient) {
+            $patient = Patient::create([
+                'user_id' => $user->id,
+            ]);
+            $user->refresh();
+            $patient = $user->patient;
+        }
+        
         $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
             'date' => 'required|date|after:now',
@@ -122,7 +147,7 @@ class AppointmentController extends Controller
         }
 
         $appointment = Appointment::create([
-            'patient_id' => auth()->user()->patient->id,
+            'patient_id' => $patient->id,
             'doctor_id' => $request->doctor_id,
             'date_time' => $dateTime,
             'reason' => $request->reason,
@@ -136,12 +161,19 @@ class AppointmentController extends Controller
 
     public function cancelOnline($id)
     {
+        $user = auth()->user();
+        $patient = $user->patient;
+        
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Patient non trouvé']);
+        }
+        
         $appointment = Appointment::where('id', $id)
-            ->where('patient_id', auth()->user()->patient->id)
+            ->where('patient_id', $patient->id)
             ->firstOrFail();
 
         $appointment->update(['status' => 'cancelled']);
 
         return response()->json(['success' => true]);
     }
-}
+    }

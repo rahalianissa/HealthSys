@@ -10,8 +10,33 @@ use Illuminate\Http\Request;
 
 class WaitingRoomController extends Controller
 {
-    
-    public function index()
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    // Pour le médecin
+    public function doctorIndex()
+    {
+        $doctorId = auth()->user()->doctor->id;
+        
+        $waiting = WaitingRoom::with(['patient.user', 'doctor.user'])
+            ->where('doctor_id', $doctorId)
+            ->where('status', 'waiting')
+            ->orderBy('priority', 'desc')
+            ->orderBy('arrival_time', 'asc')
+            ->get();
+
+        $inConsultation = WaitingRoom::with(['patient.user', 'doctor.user'])
+            ->where('doctor_id', $doctorId)
+            ->where('status', 'in_consultation')
+            ->first();
+
+        return view('doctor.waiting-room', compact('waiting', 'inConsultation'));
+    }
+
+    // Pour la secrétaire
+    public function secretaireIndex()
     {
         $waiting = WaitingRoom::with(['patient.user', 'doctor.user'])
             ->where('status', 'waiting')
@@ -19,22 +44,13 @@ class WaitingRoomController extends Controller
             ->orderBy('arrival_time', 'asc')
             ->get();
 
-        $inConsultation = WaitingRoom::with(['patient.user', 'doctor.user'])
-            ->where('status', 'in_consultation')
-            ->first();
-
         $doctors = Doctor::with('user')->get();
         $patients = Patient::with('user')->get();
 
-        $stats = [
-            'total_waiting' => $waiting->count(),
-            'average_wait_time' => $this->calculateAverageWaitTime(),
-            'completed_today' => WaitingRoom::whereDate('created_at', today())->where('status', 'completed')->count(),
-        ];
-
-        return view('waiting-room.index', compact('waiting', 'inConsultation', 'doctors', 'patients', 'stats'));
+        return view('secretaire.waiting-room', compact('waiting', 'doctors', 'patients'));
     }
 
+    // Ajouter un patient à la salle d'attente (secrétaire)
     public function add(Request $request)
     {
         $request->validate([
@@ -60,9 +76,10 @@ class WaitingRoomController extends Controller
             'status' => 'waiting',
         ]);
 
-        return redirect()->route('waiting-room')->with('success', 'Patient ajouté à la salle d\'attente');
+        return redirect()->route('secretaire.waiting-room')->with('success', 'Patient ajouté à la salle d\'attente');
     }
 
+    // Démarrer consultation (médecin)
     public function startConsultation(WaitingRoom $waitingRoom)
     {
         $waitingRoom->update([
@@ -70,9 +87,10 @@ class WaitingRoomController extends Controller
             'start_time' => now(),
         ]);
 
-        return redirect()->route('waiting-room')->with('success', 'Consultation démarrée');
+        return redirect()->route('doctor.waiting-room')->with('success', 'Consultation démarrée');
     }
 
+    // Terminer consultation (médecin)
     public function complete(WaitingRoom $waitingRoom)
     {
         $waitingRoom->update([
@@ -80,52 +98,20 @@ class WaitingRoomController extends Controller
             'end_time' => now(),
         ]);
 
-        return redirect()->route('waiting-room')->with('success', 'Consultation terminée');
+        if ($waitingRoom->appointment_id) {
+            $appointment = Appointment::find($waitingRoom->appointment_id);
+            if ($appointment && $appointment->status != 'completed') {
+                $appointment->update(['status' => 'completed']);
+            }
+        }
+
+        return redirect()->route('doctor.waiting-room')->with('success', 'Consultation terminée');
     }
 
+    // Retirer un patient de la salle d'attente (secrétaire)
     public function remove(WaitingRoom $waitingRoom)
     {
         $waitingRoom->delete();
-        return redirect()->route('waiting-room')->with('success', 'Patient retiré de la salle d\'attente');
-    }
-
-    public function updatePriority(Request $request, WaitingRoom $waitingRoom)
-    {
-        $request->validate([
-            'priority' => 'required|integer|min:0|max:2',
-        ]);
-
-        $waitingRoom->update(['priority' => $request->priority]);
-
-        return redirect()->route('waiting-room')->with('success', 'Priorité mise à jour');
-    }
-
-    private function calculateAverageWaitTime()
-    {
-        $completed = WaitingRoom::where('status', 'completed')
-            ->whereNotNull('start_time')
-            ->get();
-            
-        if ($completed->count() == 0) {
-            return 0;
-        }
-        
-        $totalWait = 0;
-        foreach ($completed as $item) {
-            $totalWait += $item->arrival_time->diffInMinutes($item->start_time);
-        }
-        
-        return round($totalWait / $completed->count());
-    }
-
-    public function getQueue()
-    {
-        $waiting = WaitingRoom::with(['patient.user', 'doctor.user'])
-            ->where('status', 'waiting')
-            ->orderBy('priority', 'desc')
-            ->orderBy('arrival_time', 'asc')
-            ->get();
-            
-        return response()->json($waiting);
+        return redirect()->route('secretaire.waiting-room')->with('success', 'Patient retiré de la salle d\'attente');
     }
 }

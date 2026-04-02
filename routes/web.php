@@ -111,14 +111,15 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
     
     // Gestion des départements
     Route::resource('departements', DepartementController::class);
-    
     // Rapports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports');
     Route::get('/reports/monthly', [ReportController::class, 'monthly'])->name('reports.monthly');
     Route::get('/reports/yearly', [ReportController::class, 'yearly'])->name('reports.yearly');
-    
     // Exports
     Route::get('/export/patients', [ExportController::class, 'patients'])->name('export.patients');
     Route::get('/export/appointments', [ExportController::class, 'appointments'])->name('export.appointments');
     Route::get('/export/invoices', [ExportController::class, 'invoices'])->name('export.invoices');
-});
+    Route::get('/consultations/{consultation}/details', [ConsultationController::class, 'details'])->name('consultations.details');
+    Route::get('/patient/prescriptions', [PrescriptionController::class, 'patientPrescriptions'])->name('patient.prescriptions');
+    Route::get('/patient/invoices', [InvoiceController::class, 'patientInvoices'])->name('patient.invoices');
+    });

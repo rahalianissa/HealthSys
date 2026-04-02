@@ -130,4 +130,22 @@ class PrescriptionController extends Controller
         return redirect()->route('prescriptions.show', $newPrescription)
             ->with('success', 'Ordonnance renouvelée avec succès');
     }
-}
+    public function patientPrescriptions()
+{
+        $user = auth()->user();
+        $patient = $user->patient;
+        
+        if (!$patient) {
+            $patient = Patient::create([
+                'user_id' => $user->id,
+            ]);
+        }
+        
+        $prescriptions = Prescription::with(['doctor.user'])
+            ->where('patient_id', $patient->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('patient.prescriptions', compact('prescriptions'));
+    }
+    }

@@ -13,12 +13,23 @@
     </div>
 </div>
 
+@php
+    $patient = auth()->user()->patient;
+    $patientId = $patient ? $patient->id : null;
+@endphp
+
 <div class="row">
     <div class="col-md-3 mb-4">
         <div class="card card-stats text-center">
             <div class="card-body">
                 <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
-                <h3>{{ \App\Models\Appointment::where('patient_id', auth()->user()->patient->id)->where('status', 'confirmed')->where('date_time', '>', now())->count() }}</h3>
+                <h3>
+                    @if($patientId)
+                        {{ \App\Models\Appointment::where('patient_id', $patientId)->where('status', 'confirmed')->where('date_time', '>', now())->count() }}
+                    @else
+                        0
+                    @endif
+                </h3>
                 <p class="text-muted mb-0">Prochains rendez-vous</p>
             </div>
         </div>
@@ -27,7 +38,13 @@
         <div class="card card-stats text-center">
             <div class="card-body">
                 <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
-                <h3>{{ \App\Models\Prescription::where('patient_id', auth()->user()->patient->id)->count() }}</h3>
+                <h3>
+                    @if($patientId)
+                        {{ \App\Models\Prescription::where('patient_id', $patientId)->count() }}
+                    @else
+                        0
+                    @endif
+                </h3>
                 <p class="text-muted mb-0">Ordonnances</p>
             </div>
         </div>
@@ -36,7 +53,13 @@
         <div class="card card-stats text-center">
             <div class="card-body">
                 <i class="fas fa-file-invoice-dollar fa-3x text-warning mb-3"></i>
-                <h3>{{ \App\Models\Invoice::where('patient_id', auth()->user()->patient->id)->where('status', 'pending')->count() }}</h3>
+                <h3>
+                    @if($patientId)
+                        {{ \App\Models\Invoice::where('patient_id', $patientId)->where('status', 'pending')->count() }}
+                    @else
+                        0
+                    @endif
+                </h3>
                 <p class="text-muted mb-0">Factures impayées</p>
             </div>
         </div>
@@ -45,7 +68,13 @@
         <div class="card card-stats text-center">
             <div class="card-body">
                 <i class="fas fa-stethoscope fa-3x text-info mb-3"></i>
-                <h3>{{ \App\Models\Consultation::where('patient_id', auth()->user()->patient->id)->count() }}</h3>
+                <h3>
+                    @if($patientId)
+                        {{ \App\Models\Consultation::where('patient_id', $patientId)->count() }}
+                    @else
+                        0
+                    @endif
+                </h3>
                 <p class="text-muted mb-0">Consultations</p>
             </div>
         </div>
@@ -83,26 +112,29 @@
             </div>
             <div class="card-body">
                 @php
-                    $appointments = \App\Models\Appointment::with(['doctor.user'])
-                        ->where('patient_id', auth()->user()->patient->id)
-                        ->where('date_time', '>', now())
-                        ->where('status', 'confirmed')
-                        ->orderBy('date_time')
-                        ->limit(5)
-                        ->get();
+                    $appointments = [];
+                    if($patientId) {
+                        $appointments = \App\Models\Appointment::with(['doctor.user'])
+                            ->where('patient_id', $patientId)
+                            ->where('date_time', '>', now())
+                            ->where('status', 'confirmed')
+                            ->orderBy('date_time')
+                            ->limit(5)
+                            ->get();
+                    }
                 @endphp
                 
-                @if($appointments->count() > 0)
+                @if(count($appointments) > 0)
                     <div class="list-group">
                         @foreach($appointments as $appointment)
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <strong>Dr. {{ $appointment->doctor->user->name }}</strong>
+                                        <strong>Dr. {{ $appointment->doctor->user->name ?? 'N/A' }}</strong>
                                         <br>
-                                        <small>{{ $appointment->date_time->format('d/m/Y à H:i') }}</small>
+                                        <small>{{ \Carbon\Carbon::parse($appointment->date_time)->format('d/m/Y à H:i') }}</small>
                                     </div>
-                                    <span class="badge bg-primary">{{ $appointment->type }}</span>
+                                    <span class="badge bg-primary">{{ $appointment->type ?? 'général' }}</span>
                                 </div>
                             </div>
                         @endforeach
