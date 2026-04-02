@@ -14,8 +14,6 @@ class Invoice extends Model
     protected $casts = [
         'issue_date' => 'date',
         'due_date' => 'date',
-        'amount' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
     ];
 
     public function patient()
@@ -36,15 +34,5 @@ class Invoice extends Model
     public function getRemainingAttribute()
     {
         return $this->amount - $this->paid_amount;
-    }
-
-    public function getFormattedAmountAttribute()
-    {
-        return number_format($this->amount, 2) . ' DT';
-    }
-
-    public function getFormattedPaidAttribute()
-    {
-        return number_format($this->paid_amount, 2) . ' DT';
     }
 }

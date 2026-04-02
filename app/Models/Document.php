@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Document extends Model
 {
     protected $fillable = [
-        'patient_id', 'title', 'type', 'file_path', 'file_name', 'file_type', 'file_size', 'description'
+        'patient_id', 'title', 'type', 'file_path', 'file_name',
+        'file_type', 'file_size', 'description'
     ];
 
     public function patient()
@@ -29,13 +30,13 @@ class Document extends Model
 
     public function getTypeLabelAttribute()
     {
-        return match($this->type) {
-            'analysis' => 'Analyse médicale',
+        $types = [
             'prescription' => 'Ordonnance',
             'certificate' => 'Certificat médical',
             'report' => 'Compte rendu',
-            'scan' => 'Scanner / IRM',
-            default => 'Document',
-        };
+            'analysis' => 'Analyse médicale',
+            'scan' => 'Scanner/IRM'
+        ];
+        return $types[$this->type] ?? 'Document';
     }
 }

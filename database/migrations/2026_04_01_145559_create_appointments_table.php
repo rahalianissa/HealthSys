@@ -10,19 +10,17 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
-            $table->unsignedBigInteger('doctor_id');
+            $table->foreignId('patient_id')->constrained()->onDelete('cascade');
+            $table->foreignId('doctor_id')->constrained()->onDelete('cascade');
+            $table->foreignId('created_by')->nullable()->constrained('users');
             $table->dateTime('date_time');
             $table->integer('duration')->default(30);
             $table->string('status')->default('pending');
-            $table->string('type')->default('consultation');
+            $table->string('type')->default('general');
             $table->text('reason')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('reminder_sent')->default(false);
             $table->timestamps();
-            
-            $table->index('patient_id');
-            $table->index('doctor_id');
         });
     }
 

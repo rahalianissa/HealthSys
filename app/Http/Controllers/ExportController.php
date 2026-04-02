@@ -2,84 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
-use App\Models\Appointment;
+use App\Exports\PatientsExport;
+use App\Exports\AppointmentsExport;
+use App\Exports\InvoicesExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class ExportController extends Controller
 {
-    public function patients()
+    public function __construct()
     {
-        $patients = Patient::with('user')->get();
-        
-        $filename = 'patients_' . date('Y-m-d') . '.csv';
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-        
-        $callback = function() use ($patients) {
-            $file = fopen('php://output', 'w');
-            
-            // Entêtes CSV
-            fputcsv($file, ['ID', 'Nom complet', 'Email', 'Téléphone', 'Date naissance', 'Adresse', 'Mutuelle', 'Allergies', 'Antécédents']);
-            
-            // Données
-            foreach ($patients as $patient) {
-                fputcsv($file, [
-                    $patient->id,
-                    $patient->user->name,
-                    $patient->user->email,
-                    $patient->user->phone,
-                    $patient->user->birth_date ?? '',
-                    $patient->user->address ?? '',
-                    $patient->insurance_company . ' ' . $patient->insurance_number,
-                    $patient->allergies ?? '',
-                    $patient->medical_history ?? '',
-                ]);
-            }
-            
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
+        $this->middleware('auth');
+        $this->middleware('role:chef_medecine,secretaire');
     }
-    
-    public function appointments()
+
+    public function patients(Request $request)
     {
-        $appointments = Appointment::with(['patient.user', 'doctor.user'])->get();
+        $search = $request->search;
+        return Excel::download(new PatientsExport($search), 'patients_' . date('Y-m-d') . '.xlsx');
+    }
+
+    public function appointments(Request $request)
+    {
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+        $status = $request->status;
+        $doctorId = $request->doctor_id;
         
-        $filename = 'rendez-vous_' . date('Y-m-d') . '.csv';
+        return Excel::download(
+            new AppointmentsExport($startDate, $endDate, $status, $doctorId), 
+            'rendez-vous_' . date('Y-m-d') . '.xlsx'
+        );
+    }
+
+    public function invoices(Request $request)
+    {
+        $status = $request->status;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
         
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-        
-        $callback = function() use ($appointments) {
-            $file = fopen('php://output', 'w');
-            
-            // Entêtes CSV
-            fputcsv($file, ['ID', 'Patient', 'Médecin', 'Date', 'Heure', 'Type', 'Statut', 'Raison']);
-            
-            // Données
-            foreach ($appointments as $appointment) {
-                fputcsv($file, [
-                    $appointment->id,
-                    $appointment->patient->user->name,
-                    'Dr. ' . $appointment->doctor->user->name,
-                    $appointment->date_time->format('d/m/Y'),
-                    $appointment->date_time->format('H:i'),
-                    $appointment->type,
-                    $appointment->status,
-                    $appointment->reason ?? '',
-                ]);
-            }
-            
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(
+            new InvoicesExport($status, $startDate, $endDate), 
+            'factures_' . date('Y-m-d') . '.xlsx'
+        );
     }
 }

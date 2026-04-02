@@ -14,9 +14,6 @@ class Consultation extends Model
 
     protected $casts = [
         'consultation_date' => 'date',
-        'weight' => 'decimal:2',
-        'height' => 'decimal:2',
-        'temperature' => 'decimal:1',
     ];
 
     public function patient()

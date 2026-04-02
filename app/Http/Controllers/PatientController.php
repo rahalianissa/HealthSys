@@ -4,16 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use App\Models\User;
-use App\Models\Appointment;
-use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class PatientController extends Controller
 {
-    
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
     public function index()
     {
@@ -59,8 +58,7 @@ class PatientController extends Controller
             'height' => $request->height,
         ]);
 
-        return redirect()->route('patients.index')
-            ->with('success', 'Patient ajouté avec succès');
+        return redirect()->route('patients.index')->with('success', 'Patient ajouté avec succès');
     }
 
     public function show(Patient $patient)
@@ -114,8 +112,7 @@ class PatientController extends Controller
             'height' => $request->height,
         ]);
 
-        return redirect()->route('patients.index')
-            ->with('success', 'Patient modifié avec succès');
+        return redirect()->route('patients.index')->with('success', 'Patient modifié avec succès');
     }
 
     public function destroy(Patient $patient)
@@ -123,54 +120,21 @@ class PatientController extends Controller
         $patient->user->delete();
         $patient->delete();
 
-        return redirect()->route('patients.index')
-            ->with('success', 'Patient supprimé avec succès');
+        return redirect()->route('patients.index')->with('success', 'Patient supprimé avec succès');
     }
 
     public function search(Request $request)
     {
-        $search = $request->search;
+        $search = $request->q;
         
         $patients = Patient::with('user')
             ->whereHas('user', function($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             })
-            ->orWhere('insurance_number', 'like', "%{$search}%")
             ->limit(10)
             ->get();
             
         return response()->json($patients);
-    }
-
-    public function exportPdf()
-    {
-        $patients = Patient::with('user')->get();
-        $pdf = Pdf::loadView('pdf.patients', compact('patients'));
-        return $pdf->download('patients_' . date('Y-m-d') . '.pdf');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new PatientsExport, 'patients_' . date('Y-m-d') . '.xlsx');
-    }
-
-    public function medicalHistory(Patient $patient)
-    {
-        $consultations = $patient->consultations()->with('doctor.user')->orderBy('consultation_date', 'desc')->get();
-        return view('patients.medical-history', compact('patient', 'consultations'));
-    }
-
-    public function appointments(Patient $patient)
-    {
-        $appointments = $patient->appointments()->with('doctor.user')->orderBy('date_time', 'desc')->get();
-        return view('patients.appointments', compact('patient', 'appointments'));
-    }
-
-    public function invoices(Patient $patient)
-    {
-        $invoices = $patient->invoices()->orderBy('created_at', 'desc')->get();
-        return view('patients.invoices', compact('patient', 'invoices'));
     }
 }

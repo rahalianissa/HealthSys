@@ -4,23 +4,28 @@ namespace App\Http\Controllers;
 
 use App\Models\Doctor;
 use App\Models\User;
-use App\Models\Appointment;
+use App\Models\Specialite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class DoctorController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:chef_medecine')->except(['index', 'show']);
+    }
 
     public function index()
     {
         $doctors = Doctor::with('user')->get();
-        return view('doctors.index', compact('doctors'));
+        return view('admin.doctors.index', compact('doctors'));
     }
 
     public function create()
     {
-        return view('doctors.create');
+        $specialites = Specialite::all();
+        return view('admin.doctors.create', compact('specialites'));
     }
 
     public function store(Request $request)
@@ -43,6 +48,7 @@ class DoctorController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'birth_date' => $request->birth_date,
+            'specialite_id' => $request->specialite_id,
         ]);
 
         Doctor::create([
@@ -52,32 +58,16 @@ class DoctorController extends Controller
             'consultation_fee' => $request->consultation_fee,
             'diploma' => $request->diploma,
             'cabinet_phone' => $request->cabinet_phone,
-            'schedule' => $request->schedule,
         ]);
 
-        return redirect()->route('doctors.index')
-            ->with('success', 'Médecin ajouté avec succès');
-    }
-
-    public function show(Doctor $doctor)
-    {
-        $doctor->load(['user', 'appointments.patient.user']);
-        
-        $stats = [
-            'total_appointments' => $doctor->appointments->count(),
-            'completed_appointments' => $doctor->appointments->where('status', 'completed')->count(),
-            'cancelled_appointments' => $doctor->appointments->where('status', 'cancelled')->count(),
-            'upcoming_appointments' => $doctor->appointments->where('date_time', '>', now())->where('status', 'confirmed')->count(),
-            'total_revenue' => $doctor->appointments->sum('consultation_fee'),
-        ];
-        
-        return view('doctors.show', compact('doctor', 'stats'));
+        return redirect()->route('admin.doctors.index')->with('success', 'Médecin ajouté avec succès');
     }
 
     public function edit(Doctor $doctor)
     {
         $doctor->load('user');
-        return view('doctors.edit', compact('doctor'));
+        $specialites = Specialite::all();
+        return view('admin.doctors.edit', compact('doctor', 'specialites'));
     }
 
     public function update(Request $request, Doctor $doctor)
@@ -97,6 +87,7 @@ class DoctorController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'birth_date' => $request->birth_date,
+            'specialite_id' => $request->specialite_id,
         ]);
 
         $doctor->update([
@@ -105,11 +96,9 @@ class DoctorController extends Controller
             'consultation_fee' => $request->consultation_fee,
             'diploma' => $request->diploma,
             'cabinet_phone' => $request->cabinet_phone,
-            'schedule' => $request->schedule,
         ]);
 
-        return redirect()->route('doctors.index')
-            ->with('success', 'Médecin modifié avec succès');
+        return redirect()->route('admin.doctors.index')->with('success', 'Médecin modifié avec succès');
     }
 
     public function destroy(Doctor $doctor)
@@ -117,25 +106,6 @@ class DoctorController extends Controller
         $doctor->user->delete();
         $doctor->delete();
 
-        return redirect()->route('doctors.index')
-            ->with('success', 'Médecin supprimé avec succès');
-    }
-
-    public function schedule(Doctor $doctor)
-    {
-        $appointments = $doctor->appointments()
-            ->with('patient.user')
-            ->where('date_time', '>=', now())
-            ->orderBy('date_time')
-            ->get();
-            
-        return view('doctors.schedule', compact('doctor', 'appointments'));
-    }
-
-    public function exportPdf()
-    {
-        $doctors = Doctor::with('user')->get();
-        $pdf = Pdf::loadView('pdf.doctors', compact('doctors'));
-        return $pdf->download('medecins_' . date('Y-m-d') . '.pdf');
+        return redirect()->route('admin.doctors.index')->with('success', 'Médecin supprimé avec succès');
     }
 }

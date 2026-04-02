@@ -7,13 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Doctor extends Model
 {
     protected $fillable = [
-        'user_id',
-        'specialty',
-        'registration_number',
-        'consultation_fee',
-        'diploma',
-        'cabinet_phone',
-        'schedule'
+        'user_id', 'specialty', 'registration_number', 'consultation_fee',
+        'diploma', 'cabinet_phone', 'schedule'
     ];
 
     protected $casts = [
@@ -35,14 +30,14 @@ class Doctor extends Model
         return $this->hasMany(Consultation::class);
     }
 
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
+
     public function waitingRooms()
     {
         return $this->hasMany(WaitingRoom::class);
-    }
-
-    public function medicalDocuments()
-    {
-        return $this->hasMany(MedicalDocument::class);
     }
 
     public function getFullNameAttribute()

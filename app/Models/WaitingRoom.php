@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class WaitingRoom extends Model
 {
     protected $fillable = [
-        'appointment_id', 'patient_id', 'doctor_id', 
-        'arrival_time', 'priority', 'status', 'notes'
+        'appointment_id', 'patient_id', 'doctor_id', 'arrival_time',
+        'start_time', 'end_time', 'priority', 'status', 'estimated_duration'
     ];
 
     protected $casts = [
         'arrival_time' => 'datetime',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
     ];
 
     public function patient()
@@ -28,45 +30,5 @@ class WaitingRoom extends Model
     public function appointment()
     {
         return $this->belongsTo(Appointment::class);
-    }
-
-    public function getPriorityTextAttribute()
-    {
-        return match($this->priority) {
-            2 => 'Urgent',
-            1 => 'Prioritaire',
-            default => 'Normal'
-        };
-    }
-
-    public function getPriorityColorAttribute()
-    {
-        return match($this->priority) {
-            2 => 'danger',
-            1 => 'warning',
-            default => 'secondary'
-        };
-    }
-
-    public function getStatusTextAttribute()
-    {
-        return match($this->status) {
-            'waiting' => 'En attente',
-            'in_consultation' => 'En consultation',
-            'completed' => 'Terminé',
-            'cancelled' => 'Annulé',
-            default => $this->status
-        };
-    }
-
-    public function getStatusColorAttribute()
-    {
-        return match($this->status) {
-            'waiting' => 'warning',
-            'in_consultation' => 'primary',
-            'completed' => 'success',
-            'cancelled' => 'danger',
-            default => 'secondary'
-        };
     }
 }

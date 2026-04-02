@@ -45,8 +45,7 @@ class AppointmentReminder extends Notification
                 ->line('📅 Date: ' . $this->appointment->date_time->format('d/m/Y'))
                 ->line('🕐 Heure: ' . $this->appointment->date_time->format('H:i'))
                 ->line('👨‍⚕️ Médecin: Dr. ' . $this->appointment->doctor->user->name)
-                ->line('Pour prendre un nouveau rendez-vous, veuillez nous contacter.')
-                ->action('Prendre un rendez-vous', url('/appointments/create'));
+                ->action('Prendre un rendez-vous', url('/patient/appointments'));
         } else {
             return (new MailMessage)
                 ->subject('Rappel de rendez-vous - HealthSys')
@@ -55,9 +54,7 @@ class AppointmentReminder extends Notification
                 ->line('📅 Date: ' . $this->appointment->date_time->format('d/m/Y'))
                 ->line('🕐 Heure: ' . $this->appointment->date_time->format('H:i'))
                 ->line('👨‍⚕️ Médecin: Dr. ' . $this->appointment->doctor->user->name)
-                ->line('📍 Adresse: ' . ($this->appointment->doctor->user->address ?? 'Notre cabinet'))
-                ->action('Confirmer ma présence', url('/appointments/' . $this->appointment->id . '/confirm'))
-                ->line('Merci de confirmer votre présence.');
+                ->action('Confirmer ma présence', url('/appointments/' . $this->appointment->id . '/confirm'));
         }
     }
 

@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Appointment extends Model
 {
     protected $fillable = [
-        'patient_id', 'doctor_id', 'date_time', 'duration',
+        'patient_id', 'doctor_id', 'created_by', 'date_time', 'duration',
         'status', 'type', 'reason', 'notes', 'reminder_sent'
     ];
 
@@ -27,27 +26,23 @@ class Appointment extends Model
         return $this->belongsTo(Doctor::class);
     }
 
-    public function getFormattedDateTimeAttribute()
+    public function creator()
     {
-        return $this->date_time->format('d/m/Y H:i');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function getStatusBadgeAttribute()
+    public function consultation()
     {
-        $badges = [
-            'pending' => 'warning',
-            'confirmed' => 'success',
-            'cancelled' => 'danger',
-            'completed' => 'secondary',
-        ];
+        return $this->hasOne(Consultation::class);
+    }
 
-        $text = [
-            'pending' => 'En attente',
-            'confirmed' => 'Confirmé',
-            'cancelled' => 'Annulé',
-            'completed' => 'Terminé',
-        ];
+    public function waitingRoom()
+    {
+        return $this->hasOne(WaitingRoom::class);
+    }
 
-        return '<span class="badge bg-' . $badges[$this->status] . '">' . $text[$this->status] . '</span>';
+    public function getFormattedDateAttribute()
+    {
+        return $this->date_time->format('d/m/Y H:i');
     }
 }

@@ -12,17 +12,11 @@ class Payment extends Model
 
     protected $casts = [
         'payment_date' => 'date',
-        'amount' => 'decimal:2',
     ];
 
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);
-    }
-
-    public function getFormattedAmountAttribute()
-    {
-        return number_format($this->amount, 2) . ' DT';
     }
 
     public function getPaymentMethodLabelAttribute()

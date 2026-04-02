@@ -7,16 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Patient extends Model
 {
     protected $fillable = [
-        'user_id',
-        'insurance_number',
-        'insurance_company',
-        'emergency_contact',
-        'emergency_phone',
-        'allergies',
-        'medical_history',
-        'blood_type',
-        'weight',
-        'height'
+        'user_id', 'insurance_number', 'insurance_company', 'emergency_contact',
+        'emergency_phone', 'allergies', 'medical_history', 'blood_type', 'weight', 'height'
     ];
 
     public function user()
@@ -44,14 +36,14 @@ class Patient extends Model
         return $this->hasMany(Invoice::class);
     }
 
-    public function waitingRooms()
-    {
-        return $this->hasMany(WaitingRoom::class);
-    }
-
     public function documents()
     {
         return $this->hasMany(Document::class);
+    }
+
+    public function waitingRooms()
+    {
+        return $this->hasMany(WaitingRoom::class);
     }
 
     public function getFullNameAttribute()
@@ -62,15 +54,5 @@ class Patient extends Model
     public function getAgeAttribute()
     {
         return $this->user->birth_date ? \Carbon\Carbon::parse($this->user->birth_date)->age : null;
-    }
-
-    public function getFormattedWeightAttribute()
-    {
-        return $this->weight ? $this->weight . ' kg' : 'N/A';
-    }
-
-    public function getFormattedHeightAttribute()
-    {
-        return $this->height ? $this->height . ' cm' : 'N/A';
     }
 }
