@@ -7,15 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Invoice extends Model
 {
     protected $fillable = [
-        'invoice_number',
-        'patient_id',
-        'consultation_id',
-        'amount',
-        'paid_amount',
-        'status',
-        'issue_date',
-        'due_date',
-        'description'
+        'invoice_number', 'patient_id', 'consultation_id', 'amount',
+        'paid_amount', 'status', 'issue_date', 'due_date', 'description'
     ];
 
     protected $casts = [
@@ -40,18 +33,18 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
-    public function getRemainingAmountAttribute()
+    public function getRemainingAttribute()
     {
         return $this->amount - $this->paid_amount;
     }
 
-    public function isPaid()
+    public function getFormattedAmountAttribute()
     {
-        return $this->status === 'paid';
+        return number_format($this->amount, 2) . ' DT';
     }
 
-    public function isOverdue()
+    public function getFormattedPaidAttribute()
     {
-        return $this->due_date < now() && $this->status !== 'paid';
+        return number_format($this->paid_amount, 2) . ' DT';
     }
 }

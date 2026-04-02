@@ -34,6 +34,11 @@ class Patient extends Model
         return $this->hasMany(Consultation::class);
     }
 
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
@@ -44,9 +49,9 @@ class Patient extends Model
         return $this->hasMany(WaitingRoom::class);
     }
 
-    public function medicalDocuments()
+    public function documents()
     {
-        return $this->hasMany(MedicalDocument::class);
+        return $this->hasMany(Document::class);
     }
 
     public function getFullNameAttribute()
@@ -57,5 +62,15 @@ class Patient extends Model
     public function getAgeAttribute()
     {
         return $this->user->birth_date ? \Carbon\Carbon::parse($this->user->birth_date)->age : null;
+    }
+
+    public function getFormattedWeightAttribute()
+    {
+        return $this->weight ? $this->weight . ' kg' : 'N/A';
+    }
+
+    public function getFormattedHeightAttribute()
+    {
+        return $this->height ? $this->height . ' cm' : 'N/A';
     }
 }

@@ -65,13 +65,13 @@
                     @endif
                 </div>
 
-                @if($invoice->payments->count() > 0)
+                @if($invoice->payments && $invoice->payments->count() > 0)
                     <div class="space-y-2">
                         @foreach($invoice->payments as $payment)
                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                                 <div>
                                     <p class="font-medium">{{ number_format($payment->amount, 2) }} DT</p>
-                                    <p class="text-sm text-gray-500">{{ $payment->payment_date->format('d/m/Y') }}</p>
+                                    <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</p>
                                 </div>
                                 <div>
                                     <span class="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">

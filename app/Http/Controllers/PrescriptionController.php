@@ -10,7 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PrescriptionController extends Controller
 {
-   
+    
 
     public function index()
     {
@@ -43,7 +43,8 @@ class PrescriptionController extends Controller
         $prescription = Prescription::create([
             'patient_id' => $request->patient_id,
             'doctor_id' => $request->doctor_id,
-            'medications' => $request->medications,
+            'consultation_id' => $request->consultation_id,
+            'medications' => json_encode($request->medications),
             'instructions' => $request->instructions,
             'prescription_date' => $request->prescription_date,
             'valid_until' => $request->valid_until,
@@ -56,7 +57,7 @@ class PrescriptionController extends Controller
 
     public function show(Prescription $prescription)
     {
-        $prescription->load(['patient.user', 'doctor.user']);
+        $prescription->load(['patient.user', 'doctor.user', 'consultation']);
         return view('prescriptions.show', compact('prescription'));
     }
 
@@ -79,7 +80,8 @@ class PrescriptionController extends Controller
         $prescription->update([
             'patient_id' => $request->patient_id,
             'doctor_id' => $request->doctor_id,
-            'medications' => $request->medications,
+            'consultation_id' => $request->consultation_id,
+            'medications' => json_encode($request->medications),
             'instructions' => $request->instructions,
             'prescription_date' => $request->prescription_date,
             'valid_until' => $request->valid_until,
@@ -108,5 +110,24 @@ class PrescriptionController extends Controller
     {
         $prescription->load(['patient.user', 'doctor.user']);
         return view('prescriptions.print', compact('prescription'));
+    }
+
+    public function forPatient(Patient $patient)
+    {
+        $prescriptions = $patient->prescriptions()->with('doctor.user')->orderBy('prescription_date', 'desc')->get();
+        return view('prescriptions.patient', compact('patient', 'prescriptions'));
+    }
+
+    public function renew(Prescription $prescription)
+    {
+        $newPrescription = $prescription->replicate();
+        $newPrescription->prescription_date = now();
+        $newPrescription->valid_until = now()->addMonths(3);
+        $newPrescription->status = 'active';
+        $newPrescription->created_at = now();
+        $newPrescription->save();
+
+        return redirect()->route('prescriptions.show', $newPrescription)
+            ->with('success', 'Ordonnance renouvelée avec succès');
     }
 }

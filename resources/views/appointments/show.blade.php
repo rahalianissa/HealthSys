@@ -72,6 +72,8 @@
                                             <span class="badge bg-success">Confirmé</span>
                                         @elseif($appointment->status == 'cancelled')
                                             <span class="badge bg-danger">Annulé</span>
+                                        @elseif($appointment->status == 'completed')
+                                            <span class="badge bg-secondary">Terminé</span>
                                         @else
                                             <span class="badge bg-secondary">{{ $appointment->status }}</span>
                                         @endif
@@ -94,14 +96,47 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ route('appointments.edit', $appointment) }}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <a href="{{ route('appointments.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour
-                    </a>
+
+                    <!-- Boutons d'action -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex space-x-2">
+                            @if($appointment->status == 'pending')
+                                <form action="{{ route('appointments.confirm', $appointment) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check-circle"></i> Confirmer
+                                    </button>
+                                </form>
+                            @endif
+                            
+                            @if($appointment->status == 'confirmed')
+                                <form action="{{ route('appointments.complete', $appointment) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-check-double"></i> Terminer
+                                    </button>
+                                </form>
+                            @endif
+                            
+                            @if($appointment->status != 'cancelled' && $appointment->status != 'completed')
+                                <form action="{{ route('appointments.cancel', $appointment) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Annuler ce rendez-vous ?')">
+                                        <i class="fas fa-times-circle"></i> Annuler
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                        
+                        <div class="d-flex space-x-2">
+                            <a href="{{ route('appointments.edit', $appointment) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <a href="{{ route('appointments.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

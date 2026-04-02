@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Doctor;
+use App\Notifications\AppointmentReminder;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -82,7 +83,7 @@ class AppointmentController extends Controller
             'type' => 'required',
             'reason' => 'nullable',
         ]);
-
+        
         $dateTime = Carbon::parse($request->date . ' ' . $request->time);
 
         // Vérifier si le créneau est disponible
@@ -95,7 +96,7 @@ class AppointmentController extends Controller
             return back()->with('error', 'Ce créneau est déjà pris')->withInput();
         }
 
-        Appointment::create([
+        $appointment = Appointment::create([
             'patient_id' => $request->patient_id,
             'doctor_id' => $request->doctor_id,
             'date_time' => $dateTime,
@@ -105,6 +106,9 @@ class AppointmentController extends Controller
             'reason' => $request->reason,
             'notes' => $request->notes,
         ]);
+
+        // Envoyer notification de confirmation (CORRECTION ICI)
+        $appointment->patient->user->notify(new AppointmentReminder($appointment, 'confirmation'));
 
         return redirect()->route('appointments.index')
             ->with('success', 'Rendez-vous créé avec succès');
@@ -149,6 +153,8 @@ class AppointmentController extends Controller
             return back()->with('error', 'Ce créneau est déjà pris')->withInput();
         }
 
+        $oldStatus = $appointment->status;
+        
         $appointment->update([
             'patient_id' => $request->patient_id,
             'doctor_id' => $request->doctor_id,
@@ -160,12 +166,24 @@ class AppointmentController extends Controller
             'notes' => $request->notes,
         ]);
 
+        // Envoyer notification si le statut change
+        if ($oldStatus != $request->status && $request->status == 'confirmed') {
+            $appointment->patient->user->notify(new AppointmentReminder($appointment, 'confirmation'));
+        } elseif ($oldStatus != $request->status && $request->status == 'cancelled') {
+            $appointment->patient->user->notify(new AppointmentReminder($appointment, 'cancellation'));
+        }
+
         return redirect()->route('appointments.index')
             ->with('success', 'Rendez-vous modifié avec succès');
     }
 
     public function destroy(Appointment $appointment)
     {
+        // Envoyer notification d'annulation avant suppression
+        if ($appointment->status != 'cancelled' && $appointment->status != 'completed') {
+            $appointment->patient->user->notify(new AppointmentReminder($appointment, 'cancellation'));
+        }
+        
         $appointment->delete();
 
         return redirect()->route('appointments.index')
@@ -178,8 +196,55 @@ class AppointmentController extends Controller
             'status' => 'required|in:pending,confirmed,cancelled,completed'
         ]);
 
+        $oldStatus = $appointment->status;
+        
         $appointment->update(['status' => $request->status]);
 
+        // Envoyer notification selon le nouveau statut
+        if ($oldStatus != $request->status && $request->status == 'confirmed') {
+            $appointment->patient->user->notify(new AppointmentReminder($appointment, 'confirmation'));
+        } elseif ($oldStatus != $request->status && $request->status == 'cancelled') {
+            $appointment->patient->user->notify(new AppointmentReminder($appointment, 'cancellation'));
+        }
+
         return back()->with('success', 'Statut du rendez-vous mis à jour');
+    }
+    
+    public function confirm(Appointment $appointment)
+    {
+        if ($appointment->status == 'pending') {
+            $appointment->update(['status' => 'confirmed']);
+            $appointment->patient->user->notify(new AppointmentReminder($appointment, 'confirmation'));
+            return redirect()->route('appointments.index')
+                ->with('success', 'Rendez-vous confirmé avec succès');
+        }
+        
+        return redirect()->route('appointments.index')
+            ->with('error', 'Impossible de confirmer ce rendez-vous');
+    }
+    
+    public function cancel(Appointment $appointment)
+    {
+        if ($appointment->status != 'cancelled' && $appointment->status != 'completed') {
+            $appointment->update(['status' => 'cancelled']);
+            $appointment->patient->user->notify(new AppointmentReminder($appointment, 'cancellation'));
+            return redirect()->route('appointments.index')
+                ->with('success', 'Rendez-vous annulé avec succès');
+        }
+        
+        return redirect()->route('appointments.index')
+            ->with('error', 'Impossible d\'annuler ce rendez-vous');
+    }
+    
+    public function complete(Appointment $appointment)
+    {
+        if ($appointment->status == 'confirmed') {
+            $appointment->update(['status' => 'completed']);
+            return redirect()->route('appointments.index')
+                ->with('success', 'Rendez-vous marqué comme terminé');
+        }
+        
+        return redirect()->route('appointments.index')
+            ->with('error', 'Impossible de terminer ce rendez-vous');
     }
 }

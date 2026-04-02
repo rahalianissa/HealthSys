@@ -14,6 +14,9 @@ class Consultation extends Model
 
     protected $casts = [
         'consultation_date' => 'date',
+        'weight' => 'decimal:2',
+        'height' => 'decimal:2',
+        'temperature' => 'decimal:1',
     ];
 
     public function patient()
@@ -34,5 +37,10 @@ class Consultation extends Model
     public function prescriptions()
     {
         return $this->hasMany(Prescription::class);
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
     }
 }
