@@ -15,6 +15,7 @@ use App\Http\Controllers\SpecialiteController;
 use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\ComptabiliteController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\MedicalRecordController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -73,24 +74,13 @@ Route::middleware(['auth', 'role:secretaire,chef_medecine'])->prefix('secretaire
     Route::get('/paiements', [ComptabiliteController::class, 'paiements'])->name('paiements');
     Route::get('/facture/create', [ComptabiliteController::class, 'createFacture'])->name('facture.create');
     Route::post('/facture', [ComptabiliteController::class, 'storeFacture'])->name('facture.store');
-    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
-    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
-    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
-    Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
-    Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
-    Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
-    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
-    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
-    Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
-    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
-    Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
-    Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
-    Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
-    Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+    Route::resource('appointments', AppointmentController::class);
+    Route::resource('patients', PatientController::class);
     Route::get('/documents', [DocumentController::class, 'index'])->name('documents');
+    Route::get('/documents/search', [DocumentController::class, 'search'])->name('documents.search');
     Route::get('/waiting-room', [WaitingRoomController::class, 'secretaireIndex'])->name('waiting-room');
     Route::post('/waiting-room/add', [WaitingRoomController::class, 'add'])->name('waiting-room.add');
-    Route::delete('/waiting-room/{waitingRoom}', [WaitingRoomController::class, 'remove'])->name('waiting-room.remove');
+    Route::delete('/waiting-room/{waitingRoom}/remove', [WaitingRoomController::class, 'remove'])->name('waiting-room.remove');
 });
 
 // Routes pour le chef de médecine (admin)
@@ -101,16 +91,15 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
     })->name('dashboard');
     
     // Gestion des médecins
-    Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
+    Route::resource('doctors', DoctorController::class);
     Route::get('/doctors/create', [DoctorController::class, 'create'])->name('doctors.create');
     Route::post('/doctors', [DoctorController::class, 'store'])->name('doctors.store');
-    Route::get('/doctors/{doctor}', [DoctorController::class, 'show'])->name('doctors.show');
     Route::get('/doctors/{doctor}/edit', [DoctorController::class, 'edit'])->name('doctors.edit');
     Route::put('/doctors/{doctor}', [DoctorController::class, 'update'])->name('doctors.update');
     Route::delete('/doctors/{doctor}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
     
     // Gestion des secrétaires
-    Route::get('/secretaries', [SecretaryController::class, 'index'])->name('secretaries.index');
+    Route::resource('secretaries', SecretaryController::class);
     Route::get('/secretaries/create', [SecretaryController::class, 'create'])->name('secretaries.create');
     Route::post('/secretaries', [SecretaryController::class, 'store'])->name('secretaries.store');
     Route::get('/secretaries/{secretary}/edit', [SecretaryController::class, 'edit'])->name('secretaries.edit');
@@ -118,20 +107,10 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
     Route::delete('/secretaries/{secretary}', [SecretaryController::class, 'destroy'])->name('secretaries.destroy');
     
     // Gestion des spécialités
-    Route::get('/specialites', [SpecialiteController::class, 'index'])->name('specialites.index');
-    Route::get('/specialites/create', [SpecialiteController::class, 'create'])->name('specialites.create');
-    Route::post('/specialites', [SpecialiteController::class, 'store'])->name('specialites.store');
-    Route::get('/specialites/{specialite}/edit', [SpecialiteController::class, 'edit'])->name('specialites.edit');
-    Route::put('/specialites/{specialite}', [SpecialiteController::class, 'update'])->name('specialites.update');
-    Route::delete('/specialites/{specialite}', [SpecialiteController::class, 'destroy'])->name('specialites.destroy');
+    Route::resource('specialites', SpecialiteController::class);
     
     // Gestion des départements
-    Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
-    Route::get('/departements/create', [DepartementController::class, 'create'])->name('departements.create');
-    Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
-    Route::get('/departements/{departement}/edit', [DepartementController::class, 'edit'])->name('departements.edit');
-    Route::put('/departements/{departement}', [DepartementController::class, 'update'])->name('departements.update');
-    Route::delete('/departements/{departement}', [DepartementController::class, 'destroy'])->name('departements.destroy');
+    Route::resource('departements', DepartementController::class);
     
     // Rapports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports');
@@ -143,7 +122,3 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
     Route::get('/export/appointments', [ExportController::class, 'appointments'])->name('export.appointments');
     Route::get('/export/invoices', [ExportController::class, 'invoices'])->name('export.invoices');
 });
-
-// Routes publiques pour les consultations (API)
-Route::get('/consultations/{id}/details', [ConsultationController::class, 'details'])->name('consultations.details');
-Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');

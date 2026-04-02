@@ -7,7 +7,6 @@
     <title>HealthSys - @yield('title', 'Gestion Cabinet Médical')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body>
@@ -21,31 +20,58 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    @guest
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Connexion</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">Inscription</a>
-                        </li>
-                    @else
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('patients.index') }}">Patients</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('doctors.index') }}">Médecins</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('appointments.index') }}">Rendez-vous</a>
-                        </li>
+                    @auth
+                        @if(auth()->user()->role == 'chef_medecine')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a>
+                            </li>
+                        @elseif(auth()->user()->role == 'doctor')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('doctor.waiting-room') }}">Salle d'attente</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('doctor.consultations') }}">Consultations</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('doctor.history') }}">Historique</a>
+                            </li>
+                        @elseif(auth()->user()->role == 'secretaire')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('secretaire.comptabilite') }}">Comptabilité</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('secretaire.appointments.index') }}">Rendez-vous</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('secretaire.patients.index') }}">Patients</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('secretaire.documents') }}">Documents</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('secretaire.waiting-room') }}">Salle d'attente</a>
+                            </li>
+                        @elseif(auth()->user()->role == 'patient')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('patient.appointments') }}">Mes rendez-vous</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('patient.medical-record') }}">Dossier médical</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('patient.prescriptions') }}">Ordonnances</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('patient.invoices') }}">Factures</a>
+                            </li>
+                        @endif
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                {{ auth()->user()->name }}
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i> {{ auth()->user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Mon profil</a></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
@@ -54,7 +80,14 @@
                                 </li>
                             </ul>
                         </li>
-                    @endguest
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">Connexion</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">Inscription</a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>
@@ -64,14 +97,14 @@
         <div class="container">
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
+                    <i class="fas fa-check-circle"></i> {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
+                    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
