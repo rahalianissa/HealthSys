@@ -123,3 +123,12 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
     Route::get('/patient/prescriptions', [PrescriptionController::class, 'patientPrescriptions'])->name('patient.prescriptions');
     Route::get('/patient/invoices', [InvoiceController::class, 'patientInvoices'])->name('patient.invoices');
     });
+
+
+Route::post('/test-upload', function(Request $request) {
+    if ($request->hasFile('test_image')) {
+        $path = $request->file('test_image')->store('test', 'public');
+        return "File uploaded to: " . $path;
+    }
+    return "No file uploaded";
+});

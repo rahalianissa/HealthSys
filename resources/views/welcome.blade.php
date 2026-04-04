@@ -6,175 +6,9 @@
     <title>HealthSys - Cabinet Médical</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #1a5f7a;
-            --secondary-color: #f0b429;
-            --dark-color: #0d3b4f;
-            --light-color: #f5f7fa;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
-        
-        .navbar {
-            background: white;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            padding: 15px 0;
-        }
-        
-        .navbar-brand {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .navbar-brand span {
-            color: var(--secondary-color);
-        }
-        
-        .hero {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
-            color: white;
-            padding: 100px 0;
-            margin-top: 70px;
-        }
-        
-        .hero h1 {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        
-        .hero p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
-        
-        .btn-custom-primary {
-            background: var(--secondary-color);
-            color: var(--dark-color);
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: bold;
-            margin: 5px;
-            transition: all 0.3s;
-        }
-        
-        .btn-custom-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .btn-custom-outline {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: bold;
-            margin: 5px;
-            transition: all 0.3s;
-        }
-        
-        .btn-custom-outline:hover {
-            background: white;
-            color: var(--primary-color);
-        }
-        
-        .feature-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-            height: 100%;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-        
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-        }
-        
-        .feature-icon i {
-            font-size: 35px;
-            color: white;
-        }
-        
-        .feature-card h4 {
-            color: var(--dark-color);
-            margin-bottom: 15px;
-        }
-        
-        .stats-section {
-            background: var(--light-color);
-            padding: 60px 0;
-        }
-        
-        .stat-box {
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 48px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .footer {
-            background: var(--dark-color);
-            color: white;
-            padding: 40px 0 20px;
-        }
-        
-        .language-selector {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: white;
-            border-radius: 50px;
-            padding: 10px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-        }
-        
-        .language-selector img {
-            width: 24px;
-            margin: 0 5px;
-            cursor: pointer;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate {
-            animation: fadeInUp 0.8s ease-out;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/aos/aos.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}">
 </head>
 <body>
     <!-- Language Selector -->
@@ -208,7 +42,7 @@
                         <a class="nav-link" href="#contact" data-lang-key="nav_contact">Contact</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-custom-outline ms-3" href="{{ route('login') }}" style="border-color: var(--primary-color); color: var(--primary-color);">
+                        <a class="btn btn-custom-outline ms-3" href="{{ route('login') }}" style="border-color: var(--secondary-color); color: var(--secondary-color);">
                             <i class="fas fa-sign-in-alt"></i> <span data-lang-key="login">Se connecter</span>
                         </a>
                     </li>
@@ -221,7 +55,7 @@
     <section class="hero" id="accueil">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-6 animate">
+                <div class="col-md-6 animate" data-aos="fade-right" data-aos-duration="1000">
                     <h1 data-lang-key="hero_title">Bienvenue sur <span style="color: var(--secondary-color);">HealthSys</span></h1>
                     <p data-lang-key="hero_desc">Système intelligent de gestion de cabinet médical. Simple, rapide et efficace pour la gestion des patients, rendez-vous et dossiers médicaux.</p>
                     <div>
@@ -233,8 +67,130 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-6 text-center animate">
+                <div class="col-md-6 text-center animate" data-aos="fade-left" data-aos-duration="1000">
                     <img src="https://www.vudailleurs.com/wp-content/uploads/2016/11/dididi-e1478470996278.jpg" alt="Doctors" class="img-fluid" style="max-height: 400px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Home Section -->
+    <section id="about-home" class="about-home section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row align-items-center">
+                <!-- About Images -->
+                <div class="col-lg-5" data-aos="fade-up" data-aos-delay="200">
+                    <div class="about-images">
+                        <div class="image-stack">
+                            <div class="image-main">
+                                <img src="{{ asset('assets/img/img1.jpg') }}" alt="Consultation médicale" class="img-fluid">
+                            </div>
+                            <div class="image-overlay">
+                                <img src="{{ asset('assets/img/img6.jpg') }}" alt="Suivi santé numérique" class="img-fluid">
+                            </div>
+                        </div>
+                        <div class="floating-badge">
+                            <div class="badge-icon">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </div>
+                            <div class="badge-info">
+                                <span class="badge-title" data-lang-key="about_badge_title">Expertise Médicale</span>
+                                <span class="badge-subtitle" data-lang-key="about_badge_subtitle">Soins Numériques</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Content -->
+                <div class="col-lg-7" data-aos="fade-up" data-aos-delay="300">
+                    <div class="about-content">
+                        <div class="section-header">
+                            <span class="subtitle" data-lang-key="about_subtitle">Plateforme de Santé Nouvelle Génération</span>
+                            <h2 data-lang-key="about_title">Transformer les Soins avec la Médecine Digitale</h2>
+                        </div>
+
+                        <p data-lang-key="about_p1">HealthSys offre aux patients et aux professionnels de santé une plateforme complète de télémedecine, de dossiers médicaux sécurisés et de suivi personnalisé. Notre solution vous permet de prendre rendez-vous instantanément, de suivre vos indicateurs de santé et de connecter avec des spécialistes de confiance.</p>
+
+                        <p data-lang-key="about_p2">Rejoignez des milliers de patients et de professionnels de santé qui font confiance à HealthSys pour simplifier les soins, améliorer les résultats et rendre la santé de qualité accessible partout, à tout moment.</p>
+
+                        <div class="features-grid">
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="400">
+                                <div class="feature-icon">
+                                    <i class="fa-solid fa-video"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h4 data-lang-key="feature_telemedicine_title">Télémedecine & Rendez-vous</h4>
+                                    <p data-lang-key="feature_telemedicine_desc">Consultez des médecins certifiés en visio ou en présentiel sans temps d'attente prolongés</p>
+                                </div>
+                            </div>
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="500">
+                                <div class="feature-icon">
+                                    <i class="fa-solid fa-file-medical"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h4 data-lang-key="feature_records_title">Dossiers Médicaux Sécurisés</h4>
+                                    <p data-lang-key="feature_records_desc">Stockez, accédez et partagez votre historique médical en toute sécurité entre professionnels</p>
+                                </div>
+                            </div>
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="600">
+                                <div class="feature-icon">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h4 data-lang-key="feature_specialists_title">Réseau de Spécialistes</h4>
+                                    <p data-lang-key="feature_specialists_desc">Connectez-vous avec des médecins, nutritionnistes et professionnels de santé vérifiés</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="about-actions">
+                            <a href="#" class="btn-discover">
+                                <span data-lang-key="about_discover_btn">Découvrir HealthSys</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="stat-box">
+                        <div class="stat-number purecounter" 
+                            data-purecounter-start="0" 
+                            data-purecounter-end="500" 
+                            data-purecounter-duration="2">0</div>
+                        <p data-lang-key="stat_patients">Patients satisfaits</p>
+                    </div>
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="stat-box">
+                        <div class="stat-number purecounter" 
+                            data-purecounter-start="0" 
+                            data-purecounter-end="20" 
+                            data-purecounter-duration="2">0</div>
+                        <p data-lang-key="stat_doctors">Médecins experts</p>
+                    </div>
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="stat-box">
+                        <div class="stat-number purecounter" 
+                            data-purecounter-start="0" 
+                            data-purecounter-end="1000" 
+                            data-purecounter-duration="2">0</div>
+                        <p data-lang-key="stat_appointments">Rendez-vous traités</p>
+                    </div>
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="stat-box">
+                        <div class="stat-number">24/7</div>
+                        <p data-lang-key="stat_support">Support disponible</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -243,12 +199,12 @@
     <!-- Features Section -->
     <section class="py-5" id="services">
         <div class="container">
-            <div class="text-center mb-5">
+            <div class="text-center mb-5" data-aos="fade-up">
                 <h2 class="display-5 fw-bold" data-lang-key="services_title">Nos Services</h2>
                 <p class="text-muted" data-lang-key="services_desc">Une solution complète pour la gestion de votre cabinet médical</p>
             </div>
             <div class="row g-4">
-                <div class="col-md-3">
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-calendar-check"></i>
@@ -257,7 +213,7 @@
                         <p data-lang-key="service1_desc">Planification et suivi des consultations facilement</p>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-users"></i>
@@ -266,7 +222,7 @@
                         <p data-lang-key="service2_desc">Historique médical, ordonnances, examens</p>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-file-invoice-dollar"></i>
@@ -275,7 +231,7 @@
                         <p data-lang-key="service3_desc">Gestion des paiements et factures</p>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-chart-line"></i>
@@ -288,61 +244,54 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
+    <!-- Alt Services Section -->
+    <section id="alt-services" class="alt-services section my-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <div class="stat-number">500+</div>
-                        <p data-lang-key="stat_patients">Patients satisfaits</p>
-                    </div>
+            <div class="row justify-content-around gy-4">
+                <!-- Services Image -->
+                <div class="features-image col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                    <img src="{{ asset('assets/img/img5.jpg') }}" alt="Services de Santé HealthSys">
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <div class="stat-number">20+</div>
-                        <p data-lang-key="stat_doctors">Médecins experts</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <div class="stat-number">1000+</div>
-                        <p data-lang-key="stat_appointments">Rendez-vous traités</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <div class="stat-number">24/7</div>
-                        <p data-lang-key="stat_support">Support disponible</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- About Section -->
-    <section class="py-5" id="about">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <img src="https://img.freepik.com/free-vector/medical-appointment-illustration_23-2148850657.jpg" alt="About" class="img-fluid rounded-4">
-                </div>
-                <div class="col-md-6">
-                    <h2 class="display-5 fw-bold mb-4" data-lang-key="about_title">À propos de HealthSys</h2>
+                <!-- Services Content -->
+                <div class="col-lg-5 d-flex flex-column justify-content-center" data-aos="fade-left" data-aos-delay="200">
+                    <h3 data-lang-key="alt_services_title">Engagés pour l'Excellence et l'Innovation Médicale</h3>
                     <p data-lang-key="about_desc1">HealthSys est une plateforme moderne de gestion de cabinet médical conçue pour optimiser le travail des professionnels de santé.</p>
                     <p data-lang-key="about_desc2">Notre solution permet de centraliser toutes les opérations : gestion des patients, rendez-vous, facturation, dossiers médicaux et rapports statistiques.</p>
-                    <div class="mt-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-check-circle text-success fs-4 me-3"></i>
-                            <span data-lang-key="about_feature1">Interface intuitive et facile à utiliser</span>
+                    
+                    <!-- Icon Box 1 -->
+                    <div class="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="300">
+                        <i class="fa-solid fa-video flex-shrink-0"></i>
+                        <div>
+                            <h4><a href="#" class="stretched-link" data-lang-key="alt_service1_title">Télémedecine & Consultations Virtuelles</a></h4>
+                            <p data-lang-key="alt_service1_desc">Consultez des médecins certifiés depuis chez vous. Notre plateforme de télémedecine vous permet d'obtenir des conseils médicaux professionnels sans déplacement, 24h/24 et 7j/7.</p>
                         </div>
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-check-circle text-success fs-4 me-3"></i>
-                            <span data-lang-key="about_feature2">Sécurité des données médicales</span>
+                    </div>
+
+                    <!-- Icon Box 2 (REPLACED: Removed AI Diagnostics) -->
+                    <div class="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="400">
+                        <i class="fa-solid fa-heart-pulse flex-shrink-0"></i>
+                        <div>
+                            <h4><a href="#" class="stretched-link" data-lang-key="alt_service2_title">Suivi Santé Personnalisé</a></h4>
+                            <p data-lang-key="alt_service2_desc">Suivez vos indicateurs de santé, recevez des rappels de médicaments et des conseils personnalisés pour mieux gérer votre bien-être au quotidien.</p>
                         </div>
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-check-circle text-success fs-4 me-3"></i>
-                            <span data-lang-key="about_feature3">Accès multi-plateformes</span>
+                    </div>
+
+                    <!-- Icon Box 3 -->
+                    <div class="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="500">
+                        <i class="fa-solid fa-file-medical-alt flex-shrink-0"></i>
+                        <div>
+                            <h4><a href="#" class="stretched-link" data-lang-key="alt_service3_title">Dossiers Médicaux Sécurisés</a></h4>
+                            <p data-lang-key="alt_service3_desc">Accédez à vos dossiers médicaux en toute sécurité, partagez-les avec vos médecins et gardez un historique complet de votre santé dans un environnement crypté et conforme aux normes.</p>
+                        </div>
+                    </div>
+
+                    <!-- Icon Box 4 -->
+                    <div class="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="600">
+                        <i class="fa-solid fa-user-md flex-shrink-0"></i>
+                        <div>
+                            <h4><a href="#" class="stretched-link" data-lang-key="alt_service4_title">Réseau de Spécialistes Certifiés</a></h4>
+                            <p data-lang-key="alt_service4_desc">Connectez-vous avec des médecins spécialistes, nutritionnistes, psychologues et autres professionnels de santé vérifiés pour un accompagnement complet de votre bien-être.</p>
                         </div>
                     </div>
                 </div>
@@ -351,27 +300,76 @@
     </section>
 
     <!-- Contact Section -->
-    <section class="bg-light py-5" id="contact">
-        <div class="container">
+    <section id="contact" class="contact section my-5">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
             <div class="text-center mb-5">
                 <h2 class="display-5 fw-bold" data-lang-key="contact_title">Contactez-nous</h2>
                 <p class="text-muted" data-lang-key="contact_desc">Une question ? Besoin d'assistance ? Notre équipe est à votre disposition.</p>
             </div>
-            <div class="row">
-                <div class="col-md-4 text-center">
-                    <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
-                    <h5 data-lang-key="contact_address_title">Adresse</h5>
-                    <p data-lang-key="contact_address">sidi bouzid</p>
+
+            <!-- Contact Info Cards -->
+            <div class="row gy-4">
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="info-item d-flex flex-column justify-content-center align-items-center">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <h3 data-lang-key="contact_address_title">Adresse</h3>
+                        <p data-lang-key="contact_address">Sidi Bouzid</p>
+                    </div>
                 </div>
-                <div class="col-md-4 text-center">
-                    <i class="fas fa-phone-alt fa-3x text-primary mb-3"></i>
-                    <h5 data-lang-key="contact_phone_title">Téléphone</h5>
-                    <p>+216 27 348 607</p>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="info-item d-flex flex-column justify-content-center align-items-center">
+                        <i class="fa-solid fa-phone"></i>
+                        <h3 data-lang-key="contact_phone_title">Nous Appeler</h3>
+                        <p>+216 12 345 678</p>
+                    </div>
                 </div>
-                <div class="col-md-4 text-center">
-                    <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
-                    <h5 data-lang-key="contact_email_title">Email</h5>
-                    <p>Anissa@healthsys.com</p>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="info-item d-flex flex-column justify-content-center align-items-center">
+                        <i class="fa-solid fa-envelope"></i>
+                        <h3 data-lang-key="contact_email_title">Nous Écrire</h3>
+                        <p>Anissa@healthsys.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map + Form -->
+            <div class="row gy-4 mt-1">
+                <!-- Google Maps -->
+                <div class="col-lg-6" data-aos="fade-right" data-aos-delay="300">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1896.3805312011064!2d9.46706234722569!3d35.024081295629266!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12fec3525b2b3c7d%3A0x1c99943b56c7f740!2z2KfZhNmF2LPYqti02YHZiSDYp9mE2KzZh9mI2Yog2KjYs9mK2K_ZiiDYqNmI2LLZitiv!5e1!3m2!1sar!2stn!4v1775197776866!5m2!1sar!2stn"
+                        width="100%" 
+                        height="450" 
+                        style="border:0; border-radius: 8px;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="col-lg-6" data-aos="fade-left" data-aos-delay="400">
+                    <form class="php-email-form" action="https://formspree.io/f/your-form-id" method="POST">
+                        <div class="row gy-4">
+                            <div class="col-md-6">
+                                <input type="text" name="name" class="form-control" placeholder="Votre Nom" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="email" name="email" class="form-control" placeholder="Votre Email" required>
+                            </div>
+                            <div class="col-md-12">
+                                <input type="text" name="subject" class="form-control" placeholder="Sujet" required>
+                            </div>
+                            <div class="col-md-12">
+                                <textarea name="message" class="form-control" rows="6" placeholder="Votre Message" required></textarea>
+                            </div>
+                            <div class="col-md-12 text-center">
+                                <button type="submit" class="btn-submit" style="background: var(--secondary-color)" data-lang-key="contact_send_btn">Envoyer le Message</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -409,125 +407,13 @@
         </div>
     </footer>
 
-    <script>
-        const translations = {
-            fr: {
-                nav_home: "Accueil",
-                nav_services: "Services",
-                nav_about: "À propos",
-                nav_contact: "Contact",
-                login: "Se connecter",
-                hero_title: "Bienvenue sur HealthSys",
-                hero_desc: "Système intelligent de gestion de cabinet médical. Simple, rapide et efficace pour la gestion des patients, rendez-vous et dossiers médicaux.",
-                login_btn: "Se connecter",
-                register_btn: "S'inscrire (Patient)",
-                services_title: "Nos Services",
-                services_desc: "Une solution complète pour la gestion de votre cabinet médical",
-                service1_title: "Gestion des rendez-vous",
-                service1_desc: "Planification et suivi des consultations facilement",
-                service2_title: "Dossiers patients",
-                service2_desc: "Historique médical, ordonnances, examens",
-                service3_title: "Facturation",
-                service3_desc: "Gestion des paiements et factures",
-                service4_title: "Statistiques",
-                service4_desc: "Analyses et rapports détaillés",
-                stat_patients: "Patients satisfaits",
-                stat_doctors: "Médecins experts",
-                stat_appointments: "Rendez-vous traités",
-                stat_support: "Support disponible",
-                about_title: "À propos de HealthSys",
-                about_desc1: "HealthSys est une plateforme moderne de gestion de cabinet médical conçue pour optimiser le travail des professionnels de santé.",
-                about_desc2: "Notre solution permet de centraliser toutes les opérations : gestion des patients, rendez-vous, facturation, dossiers médicaux et rapports statistiques.",
-                about_feature1: "Interface intuitive et facile à utiliser",
-                about_feature2: "Sécurité des données médicales",
-                about_feature3: "Accès multi-plateformes",
-                contact_title: "Contactez-nous",
-                contact_desc: "Une question ? Besoin d'assistance ? Notre équipe est à votre disposition.",
-                contact_address_title: "Adresse",
-                contact_address: "sidi bouzid",
-                contact_phone_title: "Téléphone",
-                contact_email_title: "Email",
-                footer_desc: "Système innovant pour la gestion des cabinets médicaux.",
-                footer_links: "Liens rapides",
-                footer_support: "Support",
-                footer_copyright: "Tous droits réservés."
-            },
-            ar: {
-                nav_home: "الرئيسية",
-                nav_services: "الخدمات",
-                nav_about: "من نحن",
-                nav_contact: "اتصل بنا",
-                login: "تسجيل الدخول",
-                hero_title: "مرحباً بكم في HealthSys",
-                hero_desc: "نظام ذكي لإدارة العيادات الطبية. بسيط وسريع وفعال لإدارة المرضى والمواعيد والملفات الطبية.",
-                login_btn: "تسجيل الدخول",
-                register_btn: "التسجيل (مريض)",
-                services_title: "خدماتنا",
-                services_desc: "حل متكامل لإدارة عيادتك الطبية",
-                service1_title: "إدارة المواعيد",
-                service1_desc: "تخطيط ومتابعة الاستشارات بسهولة",
-                service2_title: "ملفات المرضى",
-                service2_desc: "التاريخ الطبي، الوصفات الطبية، الفحوصات",
-                service3_title: "الفواتير",
-                service3_desc: "إدارة المدفوعات والفواتير",
-                service4_title: "الإحصائيات",
-                service4_desc: "تحليلات وتقارير مفصلة",
-                stat_patients: "مرضى راضون",
-                stat_doctors: "أطباء خبراء",
-                stat_appointments: "مواعيد تمت معالجتها",
-                stat_support: "دعم متوفر",
-                about_title: "عن HealthSys",
-                about_desc1: "HealthSys هو منصة حديثة لإدارة العيادات الطبية مصممة لتحسين عمل المتخصصين في الرعاية الصحية.",
-                about_desc2: "يتيح حلنا مركزية جميع العمليات: إدارة المرضى والمواعيد والفواتير والملفات الطبية والتقارير الإحصائية.",
-                about_feature1: "واجهة بديهية وسهلة الاستخدام",
-                about_feature2: "أمن البيانات الطبية",
-                about_feature3: "وصول متعدد المنصات",
-                contact_title: "اتصل بنا",
-                contact_desc: "لديك سؤال؟ بحاجة إلى مساعدة؟ فريقنا في خدمتك.",
-                contact_address_title: "العنوان",
-                contact_address: "sidibouzid",
-                contact_phone_title: "الهاتف",
-                contact_email_title: "البريد الإلكتروني",
-                footer_desc: "نظام مبتكر لإدارة العيادات الطبية.",
-                footer_links: "روابط سريعة",
-                footer_support: "الدعم",
-                footer_copyright: "جميع الحقوق محفوظة."
-            }
-        };
-
-        let currentLang = 'fr';
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            document.getElementById('langText').innerText = lang === 'fr' ? 'Français' : 'العربية';
-            
-            document.querySelectorAll('[data-lang-key]').forEach(el => {
-                const key = el.getAttribute('data-lang-key');
-                if (translations[lang][key]) {
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        el.placeholder = translations[lang][key];
-                    } else {
-                        el.innerHTML = translations[lang][key];
-                    }
-                }
-            });
-            
-            if (lang === 'ar') {
-                document.body.style.direction = 'rtl';
-                document.body.style.textAlign = 'right';
-            } else {
-                document.body.style.direction = 'ltr';
-                document.body.style.textAlign = 'left';
-            }
-            
-            localStorage.setItem('healthsys_lang', lang);
-        }
-        
-        const savedLang = localStorage.getItem('healthsys_lang');
-        if (savedLang) {
-            changeLanguage(savedLang);
-        }
-    </script>
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
+    <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/main.js') }}"></script>
+
+  
 </body>
 </html>
