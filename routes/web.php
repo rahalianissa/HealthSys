@@ -148,8 +148,4 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
         return "No file uploaded";
 
     });
-
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/assistant', [MedicalAssistantController::class, 'index'])->name('assistant');
-        Route::post('/assistant/analyze', [MedicalAssistantController::class, 'analyze'])->name('assistant.analyze');
-    });
+    

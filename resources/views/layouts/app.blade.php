@@ -214,12 +214,7 @@
                             <div>Factures</div>
                         </a>
                     </li>
-                    <li class="menu-item">
-                        <a href="{{ route('assistant') }}" class="menu-link">
-                            <i class="menu-icon fas fa-robot"></i>
-                            <span>Assistant Médical</span>
-                        </a>
-                    </li>
+                    
           @endif
 
                 {{-- ================= ACCOUNT / LOGOUT ================= --}}

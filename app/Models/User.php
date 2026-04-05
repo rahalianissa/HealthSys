@@ -26,6 +26,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    
 
     public function patient()
     {
