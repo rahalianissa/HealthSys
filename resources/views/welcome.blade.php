@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/chat-bot.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/aos/aos.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}">
 </head>
@@ -407,12 +408,61 @@
         </div>
     </footer>
 
+    <!-- 🔽 DROP THIS INTO YOUR HTML (replaces Angular chatbot) 🔽 -->
+    <!-- Chatbot Container -->
+<div class="ask-ai" id="chatbot">
+  
+  <!-- Header (Hidden until .open class is added) -->
+  <div class="header-bar">
+    <button id="closeBtn"><i class="fa fa-arrow-left"></i></button>
+    <img src="{{ asset('assets/img/ia_icon.png') }}" alt="ai-icon">
+    <div>
+      <h4>HealthSys IA</h4>
+      <p><i class="fa-solid fa-circle"></i> Online</p>
+    </div>
+  </div>
+
+  <div class="messages-section">
+    <div class="messages">
+      <img src="{{ asset('assets/img/chatbot2.png') }}" alt="chatbot" class="chatbot-img" id="botImage">
+      
+      <div class="conversations" id="conversationContainer">
+        <!-- Initial Bot Message -->
+        <div class="message left">
+          
+        </div>
+      </div>
+      
+      <!-- Typing Indicator -->
+      <div class="typing-indicator left hide" id="typing">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input">
+      
+      <!-- 1. The AI Icon (Visible when input is empty) -->
+      <img src="{{ asset('assets/img/ia_icon.png') }}" alt="ai-icon" class="ia-btn" id="halfCloseBtn" title="Minimize">
+      
+      <!-- 2. The Send Icon (Hidden by default, visible when typing) -->
+      <i class="fa fa-paper-plane" id="sendBtn" style="display: none;"></i>
+      
+      <!-- 3. The Input Field -->
+      <input type="text" id="userInput" placeholder="Ask AI anything..." autocomplete="off">
+    </div>
+  </div>
+</div>
+
+
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
     <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
     <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="{{ asset('assets/js/chat-bot.js') }}"></script>
 
   
 </body>
