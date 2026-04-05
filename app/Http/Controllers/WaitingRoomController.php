@@ -76,7 +76,9 @@ class WaitingRoomController extends Controller
             'status' => 'waiting',
         ]);
 
-        return redirect()->route('secretaire.waiting-room')->with('success', 'Patient ajouté à la salle d\'attente');
+        // Correction : utiliser redirect()->to()
+        return redirect()->to('/secretaire/waiting-room')
+            ->with('success', 'Patient ajouté à la salle d\'attente');
     }
 
     // Démarrer consultation (médecin)
@@ -87,7 +89,9 @@ class WaitingRoomController extends Controller
             'start_time' => now(),
         ]);
 
-        return redirect()->route('doctor.waiting-room')->with('success', 'Consultation démarrée');
+        // Correction : utiliser redirect()->to()
+        return redirect()->to('/doctor/waiting-room')
+            ->with('success', 'Consultation démarrée');
     }
 
     // Terminer consultation (médecin)
@@ -105,13 +109,18 @@ class WaitingRoomController extends Controller
             }
         }
 
-        return redirect()->route('doctor.waiting-room')->with('success', 'Consultation terminée');
+        // Correction : utiliser redirect()->to()
+        return redirect()->to('/doctor/waiting-room')
+            ->with('success', 'Consultation terminée');
     }
 
     // Retirer un patient de la salle d'attente (secrétaire)
     public function remove(WaitingRoom $waitingRoom)
     {
         $waitingRoom->delete();
-        return redirect()->route('secretaire.waiting-room')->with('success', 'Patient retiré de la salle d\'attente');
+        
+        // Correction : utiliser redirect()->to()
+        return redirect()->to('/secretaire/waiting-room')
+            ->with('success', 'Patient retiré de la salle d\'attente');
     }
 }

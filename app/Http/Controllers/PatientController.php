@@ -17,12 +17,12 @@ class PatientController extends Controller
     public function index()
     {
         $patients = Patient::with('user')->get();
-        return view('patients.index', compact('patients'));
+        return view('secretaire.patients.index', compact('patients'));
     }
 
     public function create()
     {
-        return view('patients.create');
+        return view('secretaire.patients.create');
     }
 
     public function store(Request $request)
@@ -58,29 +58,20 @@ class PatientController extends Controller
             'height' => $request->height,
         ]);
 
-        return redirect()->route('patients.index')->with('success', 'Patient ajouté avec succès');
+        return redirect()->to('/secretaire/patients')
+            ->with('success', 'Patient ajouté avec succès');
     }
 
     public function show(Patient $patient)
     {
-        $patient->load(['user', 'appointments.doctor.user', 'documents']);
-        
-        $stats = [
-            'total_appointments' => $patient->appointments->count(),
-            'completed_appointments' => $patient->appointments->where('status', 'completed')->count(),
-            'cancelled_appointments' => $patient->appointments->where('status', 'cancelled')->count(),
-            'upcoming_appointments' => $patient->appointments->where('date_time', '>', now())->where('status', 'confirmed')->count(),
-            'total_invoices' => $patient->invoices->sum('amount'),
-            'paid_invoices' => $patient->invoices->sum('paid_amount'),
-        ];
-        
-        return view('patients.show', compact('patient', 'stats'));
+        $patient->load(['user', 'appointments', 'consultations']);
+        return view('secretaire.patients.show', compact('patient'));
     }
 
     public function edit(Patient $patient)
     {
         $patient->load('user');
-        return view('patients.edit', compact('patient'));
+        return view('secretaire.patients.edit', compact('patient'));
     }
 
     public function update(Request $request, Patient $patient)
@@ -112,7 +103,8 @@ class PatientController extends Controller
             'height' => $request->height,
         ]);
 
-        return redirect()->route('patients.index')->with('success', 'Patient modifié avec succès');
+        return redirect()->to('/secretaire/patients')
+            ->with('success', 'Patient modifié avec succès');
     }
 
     public function destroy(Patient $patient)
@@ -120,21 +112,7 @@ class PatientController extends Controller
         $patient->user->delete();
         $patient->delete();
 
-        return redirect()->route('patients.index')->with('success', 'Patient supprimé avec succès');
-    }
-
-    public function search(Request $request)
-    {
-        $search = $request->q;
-        
-        $patients = Patient::with('user')
-            ->whereHas('user', function($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            })
-            ->limit(10)
-            ->get();
-            
-        return response()->json($patients);
+        return redirect()->to('/secretaire/patients')
+            ->with('success', 'Patient supprimé avec succès');
     }
 }

@@ -77,7 +77,8 @@ class ComptabiliteController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect()->route('secretaire.comptabilite')
+        // Correction ici : utiliser redirect()->to() au lieu de route()
+        return redirect()->to('/secretaire/comptabilite')
             ->with('success', 'Facture créée avec succès');
     }
 }

@@ -38,17 +38,18 @@ class AppointmentController extends Controller
             'date_time' => 'required|date|after:now',
         ]);
 
-        $appointment = Appointment::create([
+        Appointment::create([
             'patient_id' => $request->patient_id,
             'doctor_id' => $request->doctor_id,
             'date_time' => $request->date_time,
-            'duration' => 30,
+            'duration' => $request->duration ?? 30,
             'status' => 'pending',
-            'type' => 'general',
+            'type' => $request->type ?? 'general',
             'reason' => $request->reason,
+            'notes' => $request->notes,
         ]);
 
-        return redirect()->route('appointments.index')
+        return redirect()->to('/secretaire/appointments')
             ->with('success', 'Rendez-vous créé avec succès');
     }
 
@@ -72,34 +73,41 @@ class AppointmentController extends Controller
             'doctor_id' => 'required|exists:doctors,id',
             'date_time' => 'required|date',
             'status' => 'required',
+            'type' => 'required',
         ]);
 
-        $appointment->update($request->all());
+        $appointment->update([
+            'patient_id' => $request->patient_id,
+            'doctor_id' => $request->doctor_id,
+            'date_time' => $request->date_time,
+            'duration' => $request->duration ?? 30,
+            'type' => $request->type,
+            'status' => $request->status,
+            'reason' => $request->reason,
+            'notes' => $request->notes,
+        ]);
 
-        return redirect()->route('appointments.index')
+        return redirect()->to('/secretaire/appointments')
             ->with('success', 'Rendez-vous modifié avec succès');
     }
 
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
-        return redirect()->route('appointments.index')
+        return redirect()->to('/secretaire/appointments')
             ->with('success', 'Rendez-vous supprimé avec succès');
     }
 
-    // Patient methods
     // Patient methods
     public function patientIndex()
     {
         $user = auth()->user();
         $patient = $user->patient;
         
-        // Vérifier et créer le patient si nécessaire
         if (!$patient) {
             $patient = Patient::create([
                 'user_id' => $user->id,
             ]);
-            // Recharger la relation
             $user->refresh();
             $patient = $user->patient;
         }
@@ -176,4 +184,4 @@ class AppointmentController extends Controller
 
         return response()->json(['success' => true]);
     }
-    }
+}

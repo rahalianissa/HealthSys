@@ -14,6 +14,10 @@ class SecretaryController extends Controller
         $this->middleware('auth');
         $this->middleware('role:chef_medecine');
     }
+    public function dashboard()
+    {
+        return view('secretaire.dashboard');
+    }
 
     public function index()
     {

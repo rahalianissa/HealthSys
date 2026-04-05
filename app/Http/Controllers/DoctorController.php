@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Doctor;
 use App\Models\User;
 use App\Models\Specialite;
+use App\Models\Appointment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,7 +14,7 @@ class DoctorController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('role:chef_medecine')->except(['index', 'show']);
+        $this->middleware('role:chef_medecine')->except(['index', 'show', 'myPatients', 'notifications', 'markAllNotifications', 'markNotificationRead']);
     }
 
     public function index()
@@ -107,5 +108,42 @@ class DoctorController extends Controller
         $doctor->delete();
 
         return redirect()->route('admin.doctors.index')->with('success', 'Médecin supprimé avec succès');
+    }
+
+    // ========== MÉTHODES POUR LE MÉDECIN ==========
+
+    public function myPatients()
+    {
+        $doctorId = auth()->user()->doctor->id;
+        
+        $patients = Appointment::with(['patient.user'])
+            ->where('doctor_id', $doctorId)
+            ->where('status', 'completed')
+            ->select('patient_id')
+            ->distinct()
+            ->get()
+            ->pluck('patient');
+        
+        return view('doctor.patients', compact('patients'));
+    }
+
+    public function notifications()
+    {
+        return view('doctor.notifications');
+    }
+
+    public function markAllNotifications()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        return redirect()->back()->with('success', 'Toutes les notifications ont été marquées comme lues');
+    }
+
+    public function markNotificationRead($id)
+    {
+        $notification = auth()->user()->notifications()->find($id);
+        if ($notification) {
+            $notification->markAsRead();
+        }
+        return redirect()->back()->with('success', 'Notification marquée comme lue');
     }
 }

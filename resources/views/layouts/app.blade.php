@@ -99,85 +99,86 @@
                     </li>
 
                 {{-- ================= DOCTOR ================= --}}
-                @elseif(auth()->user()->role == 'doctor')
-                    <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('dashboard') }}" class="menu-link">
+                            @elseif(auth()->user()->role == 'doctor')
+                    <li class="menu-item">
+                        <a href="{{ url('/doctor/dashboard') }}" class="menu-link {{ request()->is('doctor/dashboard') ? 'active' : '' }}">
                             <i class="menu-icon fa-solid fa-chart-line"></i>
-                            <div>Dashboard</div>
+                            <span>Dashboard</span>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('doctor.waiting-room*') ? 'active' : '' }}">
-                        <a href="{{ route('doctor.waiting-room') }}" class="menu-link">
-                            <i class="menu-icon fa-solid fa-users"></i>
-                            <div>Salle d'attente</div>
+                    <li class="menu-item">
+                        <a href="{{ url('/doctor/waiting-room') }}" class="menu-link {{ request()->is('doctor/waiting-room*') ? 'active' : '' }}">
+                            <i class="menu-icon fa-solid fa-clock"></i>
+                            <span>Salle d'attente</span>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('doctor.consultations*') ? 'active' : '' }}">
-                        <a href="{{ route('doctor.consultations') }}" class="menu-link">
+                    <li class="menu-item">
+                        <a href="{{ url('/doctor/consultations') }}" class="menu-link {{ request()->is('doctor/consultations*') ? 'active' : '' }}">
                             <i class="menu-icon fa-solid fa-stethoscope"></i>
-                            <div>Consultations</div>
+                            <span>Consultations</span>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('doctor.history') ? 'active' : '' }}">
-                        <a href="{{ route('doctor.history') }}" class="menu-link">
-                            <i class="menu-icon fa-solid fa-clock-rotate-left"></i>
-                            <div>Historique</div>
+                    <li class="menu-item">
+                        <a href="{{ url('/doctor/history') }}" class="menu-link {{ request()->is('doctor/history*') ? 'active' : '' }}">
+                            <i class="menu-icon fa-solid fa-history"></i>
+                            <span>Historique</span>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('doctor.patients*') ? 'active' : '' }}">
-                        <a href="#" class="menu-link">
+                    <li class="menu-item">
+                        <a href="{{ url('/doctor/patients') }}" class="menu-link {{ request()->is('doctor/patients*') ? 'active' : '' }}">
                             <i class="menu-icon fa-solid fa-user-injured"></i>
-                            <div>Mes Patients</div>
+                            <span>Mes Patients</span>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('doctor.establish-document*') ? 'active' : '' }}">
-                        <a href="{{ route('doctor.establish-document') }}" class="menu-link">
-                            <i class="menu-icon fas fa-file-alt"></i> Établir un document
+                    <li class="menu-item">
+                        <a href="{{ url('/doctor/establish-document') }}" class="menu-link {{ request()->is('doctor/establish-document*') ? 'active' : '' }}">
+                            <i class="menu-icon fas fa-file-alt"></i>
+                            <span>Établir un document</span>
                         </a>
                     </li>
-                    <li class="menu-item" >
-                        <a href="#" class="menu-link">
-                            <i class="menu-icon fas fa-bell fa-lg"></i> Notifications
+                    <li class="menu-item">
+                        <a href="{{ url('/doctor/notifications') }}" class="menu-link {{ request()->is('doctor/notifications*') ? 'active' : '' }}">
+                            <i class="menu-icon fas fa-bell"></i>
+                            <span>Notifications</span>
                         </a>
                     </li>
-                   
 
                 {{-- ================= SECRETAIRE ================= --}}
-                @elseif(auth()->user()->role == 'secretaire')
-                    <li class="menu-item {{ request()->routeIs('secretary.dashboard*') ? 'active' : '' }}">
-                        <a href="{{ route('dashboard') }}" class="menu-link">
+                 @elseif(auth()->user()->role == 'secretaire')
+                    <li class="menu-item">
+                        <a href="{{ url('/secretaire/dashboard') }}" class="menu-link {{ request()->is('secretaire/dashboard') ? 'active' : '' }}">
                             <i class="menu-icon fa-solid fa-chart-line"></i>
-                            <div>Dashboard</div>
+                            <span>Dashboard</span>
                         </a>
                     </li>
-                    <li class="menu-item ">
-                        <a href="#" class="menu-link">
+                    <li class="menu-item">
+                        <a href="{{ url('/secretaire/appointments') }}" class="menu-link {{ request()->is('secretaire/appointments*') ? 'active' : '' }}">
                             <i class="menu-icon fa-solid fa-calendar-check"></i>
-                            <div>Rendez-vous</div>
+                            <span>Rendez-vous</span>
                         </a>
                     </li>
-                    <li class="menu-item ">
-                        <a href="#" class="menu-link">
-                            <i class="menu-icon fa-solid fa-user-injured"></i>
-                            <div>Patients</div>
-                        </a>
-                    </li>
-                    <li class="menu-item ">
-                        <a href="#" class="menu-link">
-                            <i class="menu-icon fa-solid fa-money-bill"></i>
-                            <div>Comptabilité</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('secretary.documents.*') ? 'active' : '' }}">
-                        <a href="#" class="menu-link">
-                            <i class="menu-icon fa-solid fa-file-alt"></i>
-                            <div>Documents</div>
-                        </a>
-                    </li>
-                    <li class="menu-item ">
-                        <a href="#" class="menu-link">
+                    <li class="menu-item">
+                        <a href="{{ url('/secretaire/patients') }}" class="menu-link {{ request()->is('secretaire/patients*') ? 'active' : '' }}">
                             <i class="menu-icon fa-solid fa-users"></i>
-                            <div>Salle d'attente</div>
+                            <span>Patients</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url('/secretaire/comptabilite') }}" class="menu-link {{ request()->is('secretaire/comptabilite') ? 'active' : '' }}">
+                            <i class="menu-icon fa-solid fa-chart-line"></i>
+                            <span>Comptabilité</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url('/secretaire/documents') }}" class="menu-link {{ request()->is('secretaire/documents') ? 'active' : '' }}">
+                            <i class="menu-icon fa-solid fa-file-alt"></i>
+                            <span>Documents</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url('/secretaire/waiting-room') }}" class="menu-link {{ request()->is('secretaire/waiting-room*') ? 'active' : '' }}">
+                            <i class="menu-icon fa-solid fa-clock"></i>
+                            <span>Salle d'attente</span>
                         </a>
                     </li>
 
@@ -213,7 +214,13 @@
                             <div>Factures</div>
                         </a>
                     </li>
-                @endif
+                    <li class="menu-item">
+                        <a href="{{ route('assistant') }}" class="menu-link">
+                            <i class="menu-icon fas fa-robot"></i>
+                            <span>Assistant Médical</span>
+                        </a>
+                    </li>
+          @endif
 
                 {{-- ================= ACCOUNT / LOGOUT ================= --}}
                 <li class="menu-header small text-uppercase mt-4">

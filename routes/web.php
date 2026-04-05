@@ -17,6 +17,7 @@ use App\Http\Controllers\ComptabiliteController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MedicalRecordController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MedicalAssistantController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -58,6 +59,9 @@ Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')
 
 // Routes pour les médecins
 Route::middleware(['auth', 'role:doctor,chef_medecine'])->prefix('doctor')->name('doctor.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('doctor.dashboard');
+    })->name('dashboard');
     Route::get('/waiting-room', [WaitingRoomController::class, 'doctorIndex'])->name('waiting-room');
     Route::post('/consultation/start/{waitingRoom}', [WaitingRoomController::class, 'startConsultation'])->name('consultation.start');
     Route::get('/consultations', [ConsultationController::class, 'doctorConsultations'])->name('consultations');
@@ -66,10 +70,20 @@ Route::middleware(['auth', 'role:doctor,chef_medecine'])->prefix('doctor')->name
     Route::post('/establish-document/prescription', [DocumentController::class, 'storePrescription'])->name('store-prescription');
     Route::post('/establish-document/certificate', [DocumentController::class, 'storeCertificate'])->name('store-certificate');
     Route::post('/establish-document/report', [DocumentController::class, 'storeReport'])->name('store-report');
+    Route::get('/patients', [DoctorController::class, 'myPatients'])->name('patients');
+    Route::get('/notifications', [DoctorController::class, 'notifications'])->name('notifications');
+    Route::post('/notifications/mark-all', [DoctorController::class, 'markAllNotifications'])->name('notifications.mark-all');
+    Route::post('/notifications/{id}/mark-read', [DoctorController::class, 'markNotificationRead'])->name('notifications.mark-read');
 });
 
 // Routes pour les secrétaires
+
 Route::middleware(['auth', 'role:secretaire,chef_medecine'])->prefix('secretaire')->name('secretaire.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('secretaire.dashboard');
+    })->name('dashboard');
+    
     Route::get('/comptabilite', [ComptabiliteController::class, 'index'])->name('comptabilite');
     Route::get('/paiements', [ComptabiliteController::class, 'paiements'])->name('paiements');
     Route::get('/facture/create', [ComptabiliteController::class, 'createFacture'])->name('facture.create');
@@ -89,6 +103,7 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
     Route::get('/', function () {
         return view('admin.dashboard');
     })->name('dashboard');
+    
     
     // Gestion des médecins
     Route::resource('doctors', DoctorController::class);
@@ -125,10 +140,16 @@ Route::middleware(['auth', 'role:chef_medecine'])->prefix('admin')->name('admin.
     });
 
 
-Route::post('/test-upload', function(Request $request) {
-    if ($request->hasFile('test_image')) {
-        $path = $request->file('test_image')->store('test', 'public');
-        return "File uploaded to: " . $path;
-    }
-    return "No file uploaded";
-});
+    Route::post('/test-upload', function(Request $request) {
+        if ($request->hasFile('test_image')) {
+            $path = $request->file('test_image')->store('test', 'public');
+            return "File uploaded to: " . $path;
+        }
+        return "No file uploaded";
+
+    });
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/assistant', [MedicalAssistantController::class, 'index'])->name('assistant');
+        Route::post('/assistant/analyze', [MedicalAssistantController::class, 'analyze'])->name('assistant.analyze');
+    });
