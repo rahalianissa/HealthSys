@@ -427,10 +427,7 @@
       <img src="{{ asset('assets/img/chatbot2.png') }}" alt="chatbot" class="chatbot-img" id="botImage">
       
       <div class="conversations" id="conversationContainer">
-        <!-- Initial Bot Message -->
-        <div class="message left">
-          
-        </div>
+        
       </div>
       
       <!-- Typing Indicator -->
