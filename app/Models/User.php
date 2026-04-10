@@ -12,7 +12,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'phone', 'address', 
-        'birth_date', 'specialite_id', 'departement_id','avatar',
+        'birth_date', 'specialite_id', 'departement_id', 'avatar',
     ];
 
     protected $hidden = [
@@ -26,7 +26,6 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    
 
     public function patient()
     {
@@ -66,5 +65,10 @@ class User extends Authenticatable
     public function isPatient()
     {
         return $this->role === 'patient';
+    }
+
+    public function hasRole($role)
+    {
+        return $this->role === $role;
     }
 }

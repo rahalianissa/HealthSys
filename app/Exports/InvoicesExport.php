@@ -12,9 +12,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class InvoicesExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    protected $status;
-    protected $startDate;
-    protected $endDate;
+    protected $status, $startDate, $endDate;
 
     public function __construct($status = null, $startDate = null, $endDate = null)
     {
@@ -26,39 +24,15 @@ class InvoicesExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function collection()
     {
         $query = Invoice::with(['patient.user']);
-        
-        if ($this->status) {
-            $query->where('status', $this->status);
-        }
-        
-        if ($this->startDate) {
-            $query->whereDate('issue_date', '>=', $this->startDate);
-        }
-        
-        if ($this->endDate) {
-            $query->whereDate('issue_date', '<=', $this->endDate);
-        }
-        
+        if ($this->status) $query->where('status', $this->status);
+        if ($this->startDate) $query->whereDate('issue_date', '>=', $this->startDate);
+        if ($this->endDate) $query->whereDate('issue_date', '<=', $this->endDate);
         return $query->orderBy('created_at', 'desc')->get();
     }
 
     public function headings(): array
     {
-        return [
-            '#',
-            'N° Facture',
-            'Patient',
-            'Email',
-            'Téléphone',
-            'Montant (DT)',
-            'Payé (DT)',
-            'Reste (DT)',
-            'Statut',
-            'Date d\'émission',
-            'Date d\'échéance',
-            'Description',
-            'Créé le'
-        ];
+        return ['#', 'N° Facture', 'Patient', 'Email', 'Téléphone', 'Montant (DT)', 'Payé (DT)', 'Reste (DT)', 'Statut', 'Date d\'émission', 'Date d\'échéance', 'Description', 'Créé le'];
     }
 
     public function map($invoice): array
@@ -66,12 +40,7 @@ class InvoicesExport implements FromCollection, WithHeadings, WithMapping, WithS
         static $rowNumber = 0;
         $rowNumber++;
         
-        $statusLabels = [
-            'pending' => 'En attente',
-            'paid' => 'Payée',
-            'partially_paid' => 'Partiellement payée',
-            'cancelled' => 'Annulée'
-        ];
+        $statusLabels = ['pending' => 'En attente', 'paid' => 'Payée', 'partially_paid' => 'Partiellement payée', 'cancelled' => 'Annulée'];
         
         return [
             $rowNumber,
@@ -94,10 +63,7 @@ class InvoicesExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         return [
             1 => ['font' => ['bold' => true, 'size' => 12]],
-            'A1:M1' => ['fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '1a5f7a']
-            ]],
+            'A1:M1' => ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a5f7a']]],
             'F:F' => ['font' => ['bold' => true]],
             'G:G' => ['font' => ['color' => ['rgb' => '28a745']]],
             'H:H' => ['font' => ['color' => ['rgb' => 'dc3545']]],

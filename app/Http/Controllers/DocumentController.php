@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\Patient;
 use App\Models\Prescription;
-use App\Models\Consultation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class DocumentController extends Controller
 {
@@ -33,20 +32,14 @@ class DocumentController extends Controller
             ->first();
             
         if ($patient) {
-            $documents = $patient->documents ?? [];
             return response()->json([
-                'patient' => $patient->user,
-                'documents' => $documents
+                'success' => true,
+                'patient' => ['name' => $patient->user->name, 'cin' => $patient->user->cin ?? ''],
+                'documents' => []
             ]);
         }
         
-        return response()->json(null);
-    }
-
-    public function print($id)
-    {
-        $document = Document::findOrFail($id);
-        return view('documents.print', compact('document'));
+        return response()->json(['success' => false, 'message' => 'Patient non trouvé']);
     }
 
     public function establish()
@@ -73,12 +66,9 @@ class DocumentController extends Controller
 
         $pdf = Pdf::loadView('pdf.prescription', compact('prescription'));
         $filename = 'ordonnance_' . $prescription->id . '_' . date('Y-m-d') . '.pdf';
-        $pdf->save(storage_path('app/public/' . $filename));
+        Storage::disk('public')->put($filename, $pdf->output());
 
-        return response()->json([
-            'success' => true, 
-            'pdf_url' => '/storage/' . $filename
-        ]);
+        return response()->json(['success' => true, 'pdf_url' => '/storage/' . $filename]);
     }
 
     public function storeCertificate(Request $request)
@@ -87,7 +77,6 @@ class DocumentController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'type' => 'required|string',
             'duration' => 'required|integer',
-            'reason' => 'nullable|string',
         ]);
 
         $patient = Patient::with('user')->find($request->patient_id);
@@ -103,21 +92,15 @@ class DocumentController extends Controller
 
         $pdf = Pdf::loadView('pdf.certificate', $data);
         $filename = 'certificat_' . $patient->id . '_' . date('Y-m-d') . '.pdf';
-        $pdf->save(storage_path('app/public/' . $filename));
+        Storage::disk('public')->put($filename, $pdf->output());
 
-        return response()->json([
-            'success' => true,
-            'pdf_url' => '/storage/' . $filename
-        ]);
+        return response()->json(['success' => true, 'pdf_url' => '/storage/' . $filename]);
     }
 
     public function storeReport(Request $request)
     {
         $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'diagnosis' => 'nullable|string',
-            'treatment' => 'nullable|string',
-            'recommendations' => 'nullable|string',
         ]);
 
         $patient = Patient::with('user')->find($request->patient_id);
@@ -133,11 +116,8 @@ class DocumentController extends Controller
 
         $pdf = Pdf::loadView('pdf.report', $data);
         $filename = 'compte_rendu_' . $patient->id . '_' . date('Y-m-d') . '.pdf';
-        $pdf->save(storage_path('app/public/' . $filename));
+        Storage::disk('public')->put($filename, $pdf->output());
 
-        return response()->json([
-            'success' => true,
-            'pdf_url' => '/storage/' . $filename
-        ]);
+        return response()->json(['success' => true, 'pdf_url' => '/storage/' . $filename]);
     }
 }

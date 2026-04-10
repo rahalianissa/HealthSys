@@ -12,10 +12,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class AppointmentsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    protected $startDate;
-    protected $endDate;
-    protected $status;
-    protected $doctorId;
+    protected $startDate, $endDate, $status, $doctorId;
 
     public function __construct($startDate = null, $endDate = null, $status = null, $doctorId = null)
     {
@@ -28,42 +25,16 @@ class AppointmentsExport implements FromCollection, WithHeadings, WithMapping, W
     public function collection()
     {
         $query = Appointment::with(['patient.user', 'doctor.user']);
-        
-        if ($this->startDate) {
-            $query->whereDate('date_time', '>=', $this->startDate);
-        }
-        
-        if ($this->endDate) {
-            $query->whereDate('date_time', '<=', $this->endDate);
-        }
-        
-        if ($this->status) {
-            $query->where('status', $this->status);
-        }
-        
-        if ($this->doctorId) {
-            $query->where('doctor_id', $this->doctorId);
-        }
-        
+        if ($this->startDate) $query->whereDate('date_time', '>=', $this->startDate);
+        if ($this->endDate) $query->whereDate('date_time', '<=', $this->endDate);
+        if ($this->status) $query->where('status', $this->status);
+        if ($this->doctorId) $query->where('doctor_id', $this->doctorId);
         return $query->orderBy('date_time', 'desc')->get();
     }
 
     public function headings(): array
     {
-        return [
-            '#',
-            'Date et heure',
-            'Patient',
-            'Email patient',
-            'Téléphone patient',
-            'Médecin',
-            'Spécialité',
-            'Type',
-            'Statut',
-            'Motif',
-            'Durée (min)',
-            'Créé le'
-        ];
+        return ['#', 'Date et heure', 'Patient', 'Email patient', 'Téléphone patient', 'Médecin', 'Spécialité', 'Type', 'Statut', 'Motif', 'Durée (min)', 'Créé le'];
     }
 
     public function map($appointment): array
@@ -71,19 +42,8 @@ class AppointmentsExport implements FromCollection, WithHeadings, WithMapping, W
         static $rowNumber = 0;
         $rowNumber++;
         
-        $statusLabels = [
-            'pending' => 'En attente',
-            'confirmed' => 'Confirmé',
-            'cancelled' => 'Annulé',
-            'completed' => 'Terminé'
-        ];
-        
-        $typeLabels = [
-            'general' => 'Général',
-            'emergency' => 'Urgence',
-            'follow_up' => 'Suivi',
-            'specialist' => 'Spécialiste'
-        ];
+        $statusLabels = ['pending' => 'En attente', 'confirmed' => 'Confirmé', 'cancelled' => 'Annulé', 'completed' => 'Terminé'];
+        $typeLabels = ['general' => 'Général', 'emergency' => 'Urgence', 'follow_up' => 'Suivi', 'specialist' => 'Spécialiste'];
         
         return [
             $rowNumber,
@@ -105,10 +65,7 @@ class AppointmentsExport implements FromCollection, WithHeadings, WithMapping, W
     {
         return [
             1 => ['font' => ['bold' => true, 'size' => 12]],
-            'A1:L1' => ['fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '1a5f7a']
-            ]],
+            'A1:L1' => ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a5f7a']]],
         ];
     }
 }

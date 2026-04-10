@@ -22,7 +22,6 @@ class PatientsExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function collection()
     {
         $query = Patient::with('user');
-        
         if ($this->search) {
             $query->whereHas('user', function($q) {
                 $q->where('name', 'like', "%{$this->search}%")
@@ -30,32 +29,12 @@ class PatientsExport implements FromCollection, WithHeadings, WithMapping, WithS
                   ->orWhere('phone', 'like', "%{$this->search}%");
             });
         }
-        
         return $query->get();
     }
 
     public function headings(): array
     {
-        return [
-            '#',
-            'Nom complet',
-            'Email',
-            'Téléphone',
-            'Date naissance',
-            'Âge',
-            'Adresse',
-            'Groupe sanguin',
-            'Poids (kg)',
-            'Taille (cm)',
-            'Mutuelle',
-            'Numéro mutuelle',
-            'Allergies',
-            'Antécédents médicaux',
-            'Contact urgence',
-            'Téléphone urgence',
-            'Nombre de consultations',
-            'Date d\'inscription'
-        ];
+        return ['#', 'Nom complet', 'Email', 'Téléphone', 'Date naissance', 'Âge', 'Adresse', 'Groupe sanguin', 'Poids (kg)', 'Taille (cm)', 'Mutuelle', 'Numéro mutuelle', 'Allergies', 'Antécédents médicaux', 'Contact urgence', 'Téléphone urgence', 'Nombre de consultations', 'Date d\'inscription'];
     }
 
     public function map($patient): array
@@ -89,10 +68,7 @@ class PatientsExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         return [
             1 => ['font' => ['bold' => true, 'size' => 12]],
-            'A1:R1' => ['fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '1a5f7a']
-            ]],
+            'A1:R1' => ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a5f7a']]],
         ];
     }
 }

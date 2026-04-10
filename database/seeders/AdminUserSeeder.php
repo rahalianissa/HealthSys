@@ -16,7 +16,7 @@ class AdminUserSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role' => 'chef_medecine',
             'phone' => '0612345678',
-            'address' => 'Casablanca, Maroc',
+            'address' => 'sidibouzid',
             'birth_date' => '1980-01-01',
         ]);
     }

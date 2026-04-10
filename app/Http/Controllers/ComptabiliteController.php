@@ -6,16 +6,18 @@ use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\WaitingRoom;
 use App\Models\Invoice;
-use App\Models\Payment;
+use App\Services\StatisticsService;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class ComptabiliteController extends Controller
 {
-    public function __construct()
+    protected StatisticsService $statisticsService;
+
+    public function __construct(StatisticsService $statisticsService)
     {
         $this->middleware('auth');
         $this->middleware('role:secretaire,chef_medecine');
+        $this->statisticsService = $statisticsService;
     }
 
     public function index()
@@ -27,26 +29,15 @@ class ComptabiliteController extends Controller
             'monthly_revenue' => Invoice::whereMonth('created_at', now()->month)->sum('amount'),
         ];
         
-        // Données pour les graphiques
-        $monthly_revenue_data = [];
-        $appointments_data = [];
+        $monthly_revenue_data = $this->statisticsService->getMonthlyRevenue();
+        $appointments_data = $this->statisticsService->getMonthlyAppointmentsArray();
         
-        for ($i = 1; $i <= 12; $i++) {
-            $monthly_revenue_data[] = Invoice::whereMonth('created_at', $i)->whereYear('created_at', now()->year)->sum('amount');
-            if ($i <= 6) {
-                $appointments_data[] = Appointment::whereMonth('date_time', $i)->whereYear('date_time', now()->year)->count();
-            }
-        }
-        
-        $invoices = Invoice::with('patient.user')->orderBy('created_at', 'desc')->limit(10)->get();
+        $invoices = Invoice::with('patient.user')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
         
         return view('secretaire.comptabilite', compact('stats', 'monthly_revenue_data', 'appointments_data', 'invoices'));
-    }
-
-    public function paiements()
-    {
-        $invoices = Invoice::with('patient.user')->orderBy('created_at', 'desc')->get();
-        return view('secretaire.paiements', compact('invoices'));
     }
 
     public function createFacture()
@@ -77,8 +68,6 @@ class ComptabiliteController extends Controller
             'description' => $request->description,
         ]);
 
-        // Correction ici : utiliser redirect()->to() au lieu de route()
-        return redirect()->to('/secretaire/comptabilite')
-            ->with('success', 'Facture créée avec succès');
+        return redirect()->to('/secretaire/comptabilite')->with('success', 'Facture créée avec succès');
     }
 }

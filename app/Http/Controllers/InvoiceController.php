@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    
-
     public function index()
     {
         $invoices = Invoice::with(['patient.user', 'consultation'])
@@ -32,7 +30,6 @@ class InvoiceController extends Controller
             'amount' => 'required|numeric|min:0',
             'issue_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:issue_date',
-            'description' => 'nullable|string',
         ]);
 
         $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad(Invoice::count() + 1, 4, '0', STR_PAD_LEFT);
@@ -48,8 +45,7 @@ class InvoiceController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect()->route('invoices.index')
-            ->with('success', 'Facture créée avec succès');
+        return redirect()->route('invoices.index')->with('success', 'Facture créée avec succès');
     }
 
     public function show(Invoice $invoice)
@@ -72,7 +68,6 @@ class InvoiceController extends Controller
             'issue_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:issue_date',
             'status' => 'required|in:pending,paid,partially_paid,cancelled',
-            'description' => 'nullable|string',
         ]);
 
         $invoice->update([
@@ -84,8 +79,7 @@ class InvoiceController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect()->route('invoices.index')
-            ->with('success', 'Facture modifiée avec succès');
+        return redirect()->route('invoices.index')->with('success', 'Facture modifiée avec succès');
     }
 
     public function destroy(Invoice $invoice)
@@ -95,8 +89,7 @@ class InvoiceController extends Controller
         }
         
         $invoice->delete();
-        return redirect()->route('invoices.index')
-            ->with('success', 'Facture supprimée avec succès');
+        return redirect()->route('invoices.index')->with('success', 'Facture supprimée avec succès');
     }
 
     public function addPayment(Request $request, Invoice $invoice)
@@ -105,10 +98,9 @@ class InvoiceController extends Controller
             'amount' => 'required|numeric|min:0.01|max:' . ($invoice->amount - $invoice->paid_amount),
             'payment_method' => 'required|in:cash,card,check,transfer',
             'payment_date' => 'required|date',
-            'notes' => 'nullable|string',
         ]);
 
-        $payment = Payment::create([
+        Payment::create([
             'invoice_id' => $invoice->id,
             'amount' => $request->amount,
             'payment_method' => $request->payment_method,
@@ -117,29 +109,23 @@ class InvoiceController extends Controller
         ]);
 
         $newPaidAmount = $invoice->paid_amount + $request->amount;
-        
-        $status = 'partially_paid';
-        if ($newPaidAmount >= $invoice->amount) {
-            $status = 'paid';
-        }
+        $status = $newPaidAmount >= $invoice->amount ? 'paid' : 'partially_paid';
         
         $invoice->update([
             'paid_amount' => $newPaidAmount,
             'status' => $status,
         ]);
 
-        return redirect()->route('invoices.show', $invoice)
-            ->with('success', 'Paiement enregistré avec succès');
+        return redirect()->route('invoices.show', $invoice)->with('success', 'Paiement enregistré avec succès');
     }
+
     public function patientInvoices()
     {
         $user = auth()->user();
         $patient = $user->patient;
         
         if (!$patient) {
-            $patient = Patient::create([
-                'user_id' => $user->id,
-            ]);
+            $patient = Patient::create(['user_id' => $user->id]);
         }
         
         $invoices = Invoice::with(['patient.user'])
@@ -149,4 +135,4 @@ class InvoiceController extends Controller
         
         return view('patient.invoices', compact('invoices'));
     }
-    }
+}

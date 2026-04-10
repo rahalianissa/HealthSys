@@ -10,8 +10,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PrescriptionController extends Controller
 {
-    
-
     public function index()
     {
         $prescriptions = Prescription::with(['patient.user', 'doctor.user'])
@@ -33,11 +31,7 @@ class PrescriptionController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'doctor_id' => 'required|exists:doctors,id',
             'medications' => 'required|array',
-            'medications.*.name' => 'required',
-            'medications.*.dosage' => 'required',
-            'medications.*.duration' => 'required',
             'prescription_date' => 'required|date',
-            'valid_until' => 'nullable|date|after:prescription_date',
         ]);
 
         $prescription = Prescription::create([
@@ -51,8 +45,7 @@ class PrescriptionController extends Controller
             'status' => 'active',
         ]);
 
-        return redirect()->route('prescriptions.index')
-            ->with('success', 'Ordonnance créée avec succès');
+        return redirect()->route('prescriptions.index')->with('success', 'Ordonnance créée avec succès');
     }
 
     public function show(Prescription $prescription)
@@ -88,15 +81,13 @@ class PrescriptionController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect()->route('prescriptions.index')
-            ->with('success', 'Ordonnance modifiée avec succès');
+        return redirect()->route('prescriptions.index')->with('success', 'Ordonnance modifiée avec succès');
     }
 
     public function destroy(Prescription $prescription)
     {
         $prescription->delete();
-        return redirect()->route('prescriptions.index')
-            ->with('success', 'Ordonnance supprimée avec succès');
+        return redirect()->route('prescriptions.index')->with('success', 'Ordonnance supprimée avec succès');
     }
 
     public function pdf(Prescription $prescription)
@@ -112,33 +103,13 @@ class PrescriptionController extends Controller
         return view('prescriptions.print', compact('prescription'));
     }
 
-    public function forPatient(Patient $patient)
-    {
-        $prescriptions = $patient->prescriptions()->with('doctor.user')->orderBy('prescription_date', 'desc')->get();
-        return view('prescriptions.patient', compact('patient', 'prescriptions'));
-    }
-
-    public function renew(Prescription $prescription)
-    {
-        $newPrescription = $prescription->replicate();
-        $newPrescription->prescription_date = now();
-        $newPrescription->valid_until = now()->addMonths(3);
-        $newPrescription->status = 'active';
-        $newPrescription->created_at = now();
-        $newPrescription->save();
-
-        return redirect()->route('prescriptions.show', $newPrescription)
-            ->with('success', 'Ordonnance renouvelée avec succès');
-    }
     public function patientPrescriptions()
-{
+    {
         $user = auth()->user();
         $patient = $user->patient;
         
         if (!$patient) {
-            $patient = Patient::create([
-                'user_id' => $user->id,
-            ]);
+            $patient = Patient::create(['user_id' => $user->id]);
         }
         
         $prescriptions = Prescription::with(['doctor.user'])
@@ -148,4 +119,4 @@ class PrescriptionController extends Controller
         
         return view('patient.prescriptions', compact('prescriptions'));
     }
-    }
+}

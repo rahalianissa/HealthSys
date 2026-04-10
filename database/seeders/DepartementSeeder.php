@@ -9,11 +9,7 @@ class DepartementSeeder extends Seeder
 {
     public function run(): void
     {
-        $departements = [
-            'Accueil', 'Consultations', 'Urgences', 'Hospitalisation',
-            'Laboratoire', 'Radiologie', 'Pharmacie', 'Administration'
-        ];
-        
+        $departements = ['Accueil', 'Consultations', 'Urgences', 'Hospitalisation', 'Laboratoire', 'Radiologie', 'Pharmacie', 'Administration'];
         foreach ($departements as $departement) {
             Departement::create(['nom' => $departement]);
         }

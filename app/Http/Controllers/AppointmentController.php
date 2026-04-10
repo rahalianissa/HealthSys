@@ -5,21 +5,49 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Doctor;
+use App\Services\AppointmentService;
+use App\Http\Requests\AppointmentRequest;
+use App\Http\Requests\OnlineBookingRequest;
+use App\Http\Resources\AppointmentResource;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
-    public function __construct()
+    protected AppointmentService $appointmentService;
+
+    public function __construct(AppointmentService $appointmentService)
     {
         $this->middleware('auth');
+        $this->middleware('role:secretaire,chef_medecine')->except([
+            'patientIndex', 'bookOnline', 'cancelOnline'
+        ]);
+        $this->appointmentService = $appointmentService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with(['patient.user', 'doctor.user'])
-            ->orderBy('date_time', 'desc')
-            ->get();
+        $query = Appointment::with(['patient.user', 'doctor.user']);
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->doctor_id) {
+            $query->where('doctor_id', $request->doctor_id);
+        }
+        if ($request->date_from) {
+            $query->whereDate('date_time', '>=', $request->date_from);
+        }
+        if ($request->date_to) {
+            $query->whereDate('date_time', '<=', $request->date_to);
+        }
+
+        $appointments = $query->orderBy('date_time', 'desc')->paginate(15);
+
+        if ($request->wantsJson()) {
+            return AppointmentResource::collection($appointments);
+        }
+
         return view('appointments.index', compact('appointments'));
     }
 
@@ -30,33 +58,33 @@ class AppointmentController extends Controller
         return view('appointments.create', compact('patients', 'doctors'));
     }
 
-    public function store(Request $request)
+    public function store(AppointmentRequest $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'date_time' => 'required|date|after:now',
-        ]);
+        $appointment = $this->appointmentService->create($request->validated());
 
-        Appointment::create([
-            'patient_id' => $request->patient_id,
-            'doctor_id' => $request->doctor_id,
-            'date_time' => $request->date_time,
-            'duration' => $request->duration ?? 30,
-            'status' => 'pending',
-            'type' => $request->type ?? 'general',
-            'reason' => $request->reason,
-            'notes' => $request->notes,
-        ]);
+        if ($appointment->patient && $appointment->patient->user) {
+            $appointment->patient->user->notify(
+                \App\Notifications\AppointmentNotification::appointmentConfirmation($appointment)
+            );
+        }
 
-        return redirect()->to('/secretaire/appointments')
-            ->with('success', 'Rendez-vous créé avec succès');
+        $redirectUrl = auth()->user()->hasRole('secretaire') 
+            ? '/secretaire/appointments' 
+            : route('appointments.index');
+
+        return redirect()->to($redirectUrl)->with('success', 'Rendez-vous créé avec succès');
     }
 
     public function show(Appointment $appointment)
     {
         $appointment->load(['patient.user', 'doctor.user']);
         return view('appointments.show', compact('appointment'));
+    }
+
+    public function showJson(Appointment $appointment)
+    {
+        $appointment->load(['patient.user', 'doctor.user']);
+        return response()->json($appointment);
     }
 
     public function edit(Appointment $appointment)
@@ -66,122 +94,104 @@ class AppointmentController extends Controller
         return view('appointments.edit', compact('appointment', 'patients', 'doctors'));
     }
 
-    public function update(Request $request, Appointment $appointment)
+    public function update(AppointmentRequest $request, Appointment $appointment)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'date_time' => 'required|date',
-            'status' => 'required',
-            'type' => 'required',
-        ]);
+        $appointment = $this->appointmentService->update($appointment, $request->validated());
 
-        $appointment->update([
-            'patient_id' => $request->patient_id,
-            'doctor_id' => $request->doctor_id,
-            'date_time' => $request->date_time,
-            'duration' => $request->duration ?? 30,
-            'type' => $request->type,
-            'status' => $request->status,
-            'reason' => $request->reason,
-            'notes' => $request->notes,
-        ]);
+        $redirectUrl = auth()->user()->hasRole('secretaire') 
+            ? '/secretaire/appointments' 
+            : route('appointments.index');
 
-        return redirect()->to('/secretaire/appointments')
-            ->with('success', 'Rendez-vous modifié avec succès');
+        return redirect()->to($redirectUrl)->with('success', 'Rendez-vous modifié avec succès');
     }
 
     public function destroy(Appointment $appointment)
     {
-        $appointment->delete();
-        return redirect()->to('/secretaire/appointments')
-            ->with('success', 'Rendez-vous supprimé avec succès');
+        $this->appointmentService->delete($appointment);
+        
+        $redirectUrl = auth()->user()->hasRole('secretaire') 
+            ? '/secretaire/appointments' 
+            : route('appointments.index');
+
+        return redirect()->to($redirectUrl)->with('success', 'Rendez-vous supprimé avec succès');
     }
 
-    // Patient methods
-    public function patientIndex()
+    public function patientIndex(Request $request)
     {
         $user = auth()->user();
-        $patient = $user->patient;
-        
-        if (!$patient) {
-            $patient = Patient::create([
-                'user_id' => $user->id,
-            ]);
-            $user->refresh();
-            $patient = $user->patient;
-        }
-        
-        $appointments = Appointment::with(['doctor.user'])
-            ->where('patient_id', $patient->id)
-            ->orderBy('date_time', 'desc')
-            ->get();
+        $patient = $this->getOrCreatePatient($user);
 
-        if (request()->wantsJson()) {
-            return response()->json($appointments);
+        $query = Appointment::with(['doctor.user'])
+            ->where('patient_id', $patient->id);
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        $appointments = $query->orderBy('date_time', 'desc')->paginate(10);
+
+        if ($request->wantsJson()) {
+            return AppointmentResource::collection($appointments);
         }
 
         $doctors = Doctor::with('user')->get();
         return view('patient.appointments', compact('appointments', 'doctors'));
     }
 
-    public function bookOnline(Request $request)
+    public function bookOnline(OnlineBookingRequest $request)
     {
         $user = auth()->user();
-        $patient = $user->patient;
-        
-        if (!$patient) {
-            $patient = Patient::create([
-                'user_id' => $user->id,
-            ]);
-            $user->refresh();
-            $patient = $user->patient;
-        }
-        
-        $request->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'date' => 'required|date|after:now',
-        ]);
+        $patient = $this->getOrCreatePatient($user);
 
-        $dateTime = Carbon::parse($request->date);
-
-        $exists = Appointment::where('doctor_id', $request->doctor_id)
-            ->whereDate('date_time', $dateTime)
-            ->where('status', '!=', 'cancelled')
-            ->exists();
-
-        if ($exists) {
-            return response()->json(['success' => false, 'message' => 'Ce créneau n\'est pas disponible']);
+        if (!$this->appointmentService->isSlotAvailable(
+            $request->doctor_id, 
+            Carbon::parse($request->date)
+        )) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Ce créneau n\'est pas disponible'
+            ], 409);
         }
 
-        $appointment = Appointment::create([
+        $appointment = $this->appointmentService->create([
             'patient_id' => $patient->id,
             'doctor_id' => $request->doctor_id,
-            'date_time' => $dateTime,
+            'date_time' => $request->date,
             'reason' => $request->reason,
             'status' => 'pending',
             'type' => 'general',
             'duration' => 30,
         ]);
 
-        return response()->json(['success' => true, 'appointment' => $appointment]);
+        return response()->json([
+            'success' => true, 
+            'appointment' => new AppointmentResource($appointment)
+        ], 201);
     }
 
     public function cancelOnline($id)
     {
         $user = auth()->user();
         $patient = $user->patient;
-        
+
         if (!$patient) {
-            return response()->json(['success' => false, 'message' => 'Patient non trouvé']);
+            return response()->json(['success' => false, 'message' => 'Patient non trouvé'], 404);
         }
-        
+
         $appointment = Appointment::where('id', $id)
             ->where('patient_id', $patient->id)
             ->firstOrFail();
 
-        $appointment->update(['status' => 'cancelled']);
+        $this->appointmentService->cancel($appointment);
 
         return response()->json(['success' => true]);
+    }
+
+    private function getOrCreatePatient($user)
+    {
+        if ($user->patient) {
+            return $user->patient;
+        }
+        return Patient::create(['user_id' => $user->id]);
     }
 }

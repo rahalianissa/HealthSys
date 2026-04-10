@@ -8,7 +8,7 @@ class Doctor extends Model
 {
     protected $fillable = [
         'user_id', 'specialty', 'registration_number', 'consultation_fee',
-        'diploma', 'cabinet_phone', 'schedule'
+        'diploma', 'cabinet_phone', 'schedule', 'address'
     ];
 
     protected $casts = [
@@ -43,5 +43,13 @@ class Doctor extends Model
     public function getFullNameAttribute()
     {
         return $this->user->name;
+    }
+
+    public function getAddressAttribute()
+    {
+        if (isset($this->attributes['address']) && $this->attributes['address']) {
+            return $this->attributes['address'];
+        }
+        return $this->user?->address;
     }
 }

@@ -15,7 +15,6 @@ class WaitingRoomController extends Controller
         $this->middleware('auth');
     }
 
-    // Pour le médecin
     public function doctorIndex()
     {
         $doctorId = auth()->user()->doctor->id;
@@ -35,7 +34,6 @@ class WaitingRoomController extends Controller
         return view('doctor.waiting-room', compact('waiting', 'inConsultation'));
     }
 
-    // Pour la secrétaire
     public function secretaireIndex()
     {
         $waiting = WaitingRoom::with(['patient.user', 'doctor.user'])
@@ -50,7 +48,6 @@ class WaitingRoomController extends Controller
         return view('secretaire.waiting-room', compact('waiting', 'doctors', 'patients'));
     }
 
-    // Ajouter un patient à la salle d'attente (secrétaire)
     public function add(Request $request)
     {
         $request->validate([
@@ -64,7 +61,7 @@ class WaitingRoomController extends Controller
             ->first();
 
         if ($existing) {
-            return back()->with('error', 'Patient déjà en salle d\'attente');
+            return redirect()->back()->with('error', 'Patient déjà en salle d\'attente');
         }
 
         WaitingRoom::create([
@@ -76,12 +73,9 @@ class WaitingRoomController extends Controller
             'status' => 'waiting',
         ]);
 
-        // Correction : utiliser redirect()->to()
-        return redirect()->to('/secretaire/waiting-room')
-            ->with('success', 'Patient ajouté à la salle d\'attente');
+        return redirect()->back()->with('success', 'Patient ajouté à la salle d\'attente');
     }
 
-    // Démarrer consultation (médecin)
     public function startConsultation(WaitingRoom $waitingRoom)
     {
         $waitingRoom->update([
@@ -89,12 +83,9 @@ class WaitingRoomController extends Controller
             'start_time' => now(),
         ]);
 
-        // Correction : utiliser redirect()->to()
-        return redirect()->to('/doctor/waiting-room')
-            ->with('success', 'Consultation démarrée');
+        return redirect()->back()->with('success', 'Consultation démarrée');
     }
 
-    // Terminer consultation (médecin)
     public function complete(WaitingRoom $waitingRoom)
     {
         $waitingRoom->update([
@@ -103,24 +94,15 @@ class WaitingRoomController extends Controller
         ]);
 
         if ($waitingRoom->appointment_id) {
-            $appointment = Appointment::find($waitingRoom->appointment_id);
-            if ($appointment && $appointment->status != 'completed') {
-                $appointment->update(['status' => 'completed']);
-            }
+            Appointment::where('id', $waitingRoom->appointment_id)->update(['status' => 'completed']);
         }
 
-        // Correction : utiliser redirect()->to()
-        return redirect()->to('/doctor/waiting-room')
-            ->with('success', 'Consultation terminée');
+        return redirect()->back()->with('success', 'Consultation terminée');
     }
 
-    // Retirer un patient de la salle d'attente (secrétaire)
     public function remove(WaitingRoom $waitingRoom)
     {
         $waitingRoom->delete();
-        
-        // Correction : utiliser redirect()->to()
-        return redirect()->to('/secretaire/waiting-room')
-            ->with('success', 'Patient retiré de la salle d\'attente');
+        return redirect()->back()->with('success', 'Patient retiré de la salle d\'attente');
     }
 }

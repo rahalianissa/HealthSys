@@ -58,8 +58,7 @@ class PatientController extends Controller
             'height' => $request->height,
         ]);
 
-        return redirect()->to('/secretaire/patients')
-            ->with('success', 'Patient ajouté avec succès');
+        return redirect()->to('/secretaire/patients')->with('success', 'Patient ajouté avec succès');
     }
 
     public function show(Patient $patient)
@@ -91,6 +90,10 @@ class PatientController extends Controller
             'birth_date' => $request->birth_date,
         ]);
 
+        if ($request->filled('password')) {
+            $patient->user->update(['password' => Hash::make($request->password)]);
+        }
+
         $patient->update([
             'insurance_number' => $request->insurance_number,
             'insurance_company' => $request->insurance_company,
@@ -103,16 +106,14 @@ class PatientController extends Controller
             'height' => $request->height,
         ]);
 
-        return redirect()->to('/secretaire/patients')
-            ->with('success', 'Patient modifié avec succès');
+        return redirect()->to('/secretaire/patients')->with('success', 'Patient modifié avec succès');
     }
 
     public function destroy(Patient $patient)
     {
-        $patient->user->delete();
+        $user = $patient->user;
         $patient->delete();
-
-        return redirect()->to('/secretaire/patients')
-            ->with('success', 'Patient supprimé avec succès');
+        $user->delete();
+        return redirect()->to('/secretaire/patients')->with('success', 'Patient supprimé avec succès');
     }
 }

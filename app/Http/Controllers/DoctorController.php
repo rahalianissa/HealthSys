@@ -3,23 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Doctor;
-use App\Models\User;
+use App\Models\Patient;
 use App\Models\Specialite;
 use App\Models\Appointment;
+use App\Services\UserService;
+use App\Http\Requests\DoctorRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class DoctorController extends Controller
 {
-    public function __construct()
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
     {
         $this->middleware('auth');
-        $this->middleware('role:chef_medecine')->except(['index', 'show', 'myPatients', 'notifications', 'markAllNotifications', 'markNotificationRead']);
+        $this->middleware('role:chef_medecine')->except(['index', 'myPatients', 'notifications', 'markAllNotifications', 'markNotificationRead', 'showPatient']);
+        $this->userService = $userService;
     }
 
     public function index()
     {
-        $doctors = Doctor::with('user')->get();
+        $doctors = Doctor::with('user')->paginate(15);
         return view('admin.doctors.index', compact('doctors'));
     }
 
@@ -29,38 +33,9 @@ class DoctorController extends Controller
         return view('admin.doctors.create', compact('specialites'));
     }
 
-    public function store(Request $request)
+    public function store(DoctorRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'phone' => 'required',
-            'specialty' => 'required',
-            'registration_number' => 'required|unique:doctors',
-            'consultation_fee' => 'required|numeric',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'doctor',
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'birth_date' => $request->birth_date,
-            'specialite_id' => $request->specialite_id,
-        ]);
-
-        Doctor::create([
-            'user_id' => $user->id,
-            'specialty' => $request->specialty,
-            'registration_number' => $request->registration_number,
-            'consultation_fee' => $request->consultation_fee,
-            'diploma' => $request->diploma,
-            'cabinet_phone' => $request->cabinet_phone,
-        ]);
-
+        $this->userService->createDoctor($request->validated());
         return redirect()->route('admin.doctors.index')->with('success', 'Médecin ajouté avec succès');
     }
 
@@ -71,65 +46,48 @@ class DoctorController extends Controller
         return view('admin.doctors.edit', compact('doctor', 'specialites'));
     }
 
-    public function update(Request $request, Doctor $doctor)
+    public function update(DoctorRequest $request, Doctor $doctor)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $doctor->user_id,
-            'phone' => 'required',
-            'specialty' => 'required',
-            'registration_number' => 'required|unique:doctors,registration_number,' . $doctor->id,
-            'consultation_fee' => 'required|numeric',
-        ]);
-
-        $doctor->user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'birth_date' => $request->birth_date,
-            'specialite_id' => $request->specialite_id,
-        ]);
-
-        $doctor->update([
-            'specialty' => $request->specialty,
-            'registration_number' => $request->registration_number,
-            'consultation_fee' => $request->consultation_fee,
-            'diploma' => $request->diploma,
-            'cabinet_phone' => $request->cabinet_phone,
-        ]);
-
+        $this->userService->updateDoctor($doctor, $request->validated());
         return redirect()->route('admin.doctors.index')->with('success', 'Médecin modifié avec succès');
     }
 
     public function destroy(Doctor $doctor)
     {
-        $doctor->user->delete();
-        $doctor->delete();
-
+        $this->userService->deleteDoctor($doctor);
         return redirect()->route('admin.doctors.index')->with('success', 'Médecin supprimé avec succès');
     }
 
-    // ========== MÉTHODES POUR LE MÉDECIN ==========
-
-    public function myPatients()
+    public function myPatients(Request $request)
     {
         $doctorId = auth()->user()->doctor->id;
         
-        $patients = Appointment::with(['patient.user'])
+        $query = Appointment::with(['patient.user'])
             ->where('doctor_id', $doctorId)
             ->where('status', 'completed')
             ->select('patient_id')
-            ->distinct()
-            ->get()
-            ->pluck('patient');
+            ->distinct();
+            
+        if ($request->search) {
+            $query->whereHas('patient.user', function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%");
+            });
+        }
         
+        $patients = $query->get()->pluck('patient');
         return view('doctor.patients', compact('patients'));
+    }
+
+    public function showPatient(Patient $patient)
+    {
+        $patient->load(['user', 'consultations.doctor.user', 'prescriptions.doctor.user']);
+        return view('doctor.patient-show', compact('patient'));
     }
 
     public function notifications()
     {
-        return view('doctor.notifications');
+        $notifications = auth()->user()->notifications()->paginate(20);
+        return view('doctor.notifications', compact('notifications'));
     }
 
     public function markAllNotifications()
